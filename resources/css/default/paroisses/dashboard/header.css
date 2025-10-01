@@ -1,0 +1,250 @@
+:root {
+    --font-stack: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --color-text: #1f2d3a;
+    --color-muted: #6b7a8c;
+    --color-link: #2563eb;
+    --color-link-hover: #1e40af;
+    --bg-card: #f5f7fa;
+    --border: #d9e2ec;
+    --radius: 0.5rem;
+    --transition: 0.2s ease-in-out;
+}
+
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: white;
+    border-bottom: 1px solid #e6e8ec;
+    gap: 1rem;
+}
+.header-left,
+.header-center,
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-center h2 {
+    font-size: 3rem;
+    margin: 0;
+}
+.header-left .logo a {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #222;
+}
+.menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+}
+
+.title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 227px;
+    text-align: center;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    max-width: 100%;
+    word-break: break-word;
+}
+
+.title .name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-link);
+    text-decoration: none;
+    position: relative;
+    line-height: 1.2;
+    transition: color var(--transition);
+}
+
+/* souligner en animation subtile au hover/focus */
+.title .name::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 2px;
+    width: 0;
+    background: var(--color-link);
+    transition: width var(--transition);
+}
+
+.title .name:hover,
+.title .name:focus {
+    color: var(--color-link-hover);
+}
+
+.title .name:hover::after,
+.title .name:focus::after {
+    width: 100%;
+}
+
+.title .slogan {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--color-muted);
+    margin: 0;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Variante compacte si besoin */
+.title.inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center; /* s’assure que tout est aligné verticalement */
+    gap: 1rem;
+}
+
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.user-menu__toggle {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-bg);
+    color: #4f46e5;
+    border-bottom: 2px solid #B3B7BFFF;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    justify-content: space-between;
+    transition: background-color 0.3s;
+    gap: 20px;
+}
+.user-menu__toggle img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+}
+
+.user-menu__toggle div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25rem;
+}
+.user-menu__toggle svg {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.3s;
+}
+
+.user-menu__toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
+
+/* Dropdown */
+[x-cloak] {
+    display: none !important;
+}
+.user-menu__dropdown {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #B3B7BFFF;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+.user-menu__dropdown[x-show] {
+    /* Alpine.js appliquera display: block */
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Éléments du menu */
+.user-menu__dropdown a,
+.user-menu__dropdown button,
+.user-menu__dropdown form button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: #363E55FF;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+.user-menu__dropdown a:hover,
+.user-menu__dropdown button:hover,
+.user-menu__dropdown form button:hover {
+    background-color: #E5E5E5FF;
+}
+.user-menu__dropdown svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.75rem;
+    fill: #686E80FF;
+}
+.badge {
+    background-color: #4f46e5;
+    color: #363E55FF;
+    border-radius: 999px;
+    padding: 0.2em 0.5em;
+    font-size: 0.75rem;
+    margin-left: auto;
+}
+
+#menu-toggle {
+   display: none;
+}
+
+
+@media (max-width: 1024px) {
+    .user-menu__toggle {
+        background-color: transparent;
+        border-bottom: transparent;
+    }
+    .user-menu__toggle img {
+        width: 42px;
+        height: 42px;
+    }
+    .user-menu__toggle div {
+        display: none;
+    }
+    .user-menu__toggle svg {
+        display: none;
+    }
+
+    .user-menu__dropdown {
+        position: fixed;
+        top: 75px;
+        right: 0;
+        width: 300px;
+        height: 150px;
+        background-color: #fff;
+        box-shadow: none;
+        opacity: 1;
+        border: 2px solid gray;
+    }
+}

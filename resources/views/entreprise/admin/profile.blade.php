@@ -1,0 +1,1 @@
+@extends('entreprise.layouts.app')

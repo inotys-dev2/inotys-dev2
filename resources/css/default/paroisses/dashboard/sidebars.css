@@ -1,0 +1,89 @@
+:root {
+    --spacing-header: 20px;
+    --radius: 6px;
+    --transition: .2s ease;
+    --color-bg: #f0f2f7;
+    --color-surface: #fff;
+    --color-sidebar: #f5f7fa;
+    --color-border: #e6e8ec;
+    --color-primary: #4f46e5;
+    --color-text: #1f2d3a;
+    --color-muted: #6b7280;
+    --shadow: 0 12px 48px -10px rgba(31,45,58,.08);
+}
+
+/* Sidebar fixe sous la navbar */
+.sidebar {
+    position: fixed;
+    top: 90px;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    background: var(--color-sidebar);
+    padding: 1rem;
+    border-right: 1px solid var(--color-border);
+    overflow-y: auto;
+    z-index: 10;
+}
+/* Menu */
+.menu {
+    font-size: 0.95rem;
+}
+.menu h2 {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    margin: 1rem 0 0.25rem;
+    letter-spacing: 1px;
+    font-weight: 600;
+    color: var(--color-muted);
+}
+.menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.menu li {
+    margin: 4px 0;
+}
+.menu a {
+    display: block;
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--radius);
+    position: relative;
+    transition: background var(--transition), color var(--transition);
+    outline: 2px solid transparent;
+}
+.menu a:hover {
+    background: rgba(79,70,229,0.08);
+    color: var(--color-primary);
+}
+.menu a:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+.menu a[aria-current="page"],
+.menu li.active > a {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+/* Footer */
+.sidebar-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.sidebar-footer a {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+}
+.sidebar-footer form button {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.75rem;
+    color: #d23f3f;
+    cursor: pointer;
+    text-align: left;
+}

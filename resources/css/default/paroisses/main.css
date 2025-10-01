@@ -1,0 +1,42 @@
+@import "dashboard/header.css";
+@import "dashboard/navbars.css";
+@import "dashboard/sidebars.css";
+@import "dashboard/footer.css";
+@import "dashboard/main-content.css";
+@import "agenda/view.css";
+@import "agenda/demandes.css";
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+:root {
+    /* — Thème Clair (par défaut) — */
+    --color-bg: #F5F5F5;           /* Fond principal */
+    --color-card-bg: #FFFFFF;      /* Cartes / sections */
+    --color-text: #333333;         /* Texte principal */
+    --color-title: #1A1A1A;        /* Titres */
+    --color-accent: #C0A080;       /* Accent / liens */
+
+    --font-title: 'Playfair Display', serif;
+    --font-size-title: 32px;
+    --font-weight-title: 700;
+
+    --font-info: 'Roboto', sans‑serif;
+    --font-size-info: 16px;
+    --font-weight-info: 400;
+
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --accent: #00529b;
+    --radius: 8px;
+    --transition: .2s;
+
+    --bg-btn-accept: #28a745;
+}
+
+
+

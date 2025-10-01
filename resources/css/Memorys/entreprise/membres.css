@@ -1,0 +1,92 @@
+/* Conteneur global */
+.users-container {
+    background-color: var(--memorys-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* En-tête avec titre + bouton */
+.users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--memorys-primary);
+    padding: 0.75rem 1rem;
+}
+.users-title {
+    color: #fff;
+    font-size: 1.25rem;
+    margin: 0;
+}
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--memorys-accent);
+    color: #fff;
+    font-size: 0. nine rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+}
+.btn-add i {
+    margin-right: 0.5rem;
+}
+
+/* Table des utilisateurs */
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--memorys-input-bg);
+}
+.users-table th,
+.users-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    color: var(--memorys-secondary);
+    border-bottom: 1px solid var(--memorys-border);
+    font-size: 0. nine rem;
+}
+.users-table thead {
+    background-color: var(--memorys-bg);
+}
+.users-table th {
+    font-weight: 600;
+}
+
+/* Badges de status */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    font-size: 0. eight rem;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    color: #fff;
+}
+.badge-online {
+    background-color: #28a745; /* vert */
+}
+.badge-offline {
+    background-color: #dc3545; /* rouge */
+}
+
+/* Actions (icônes) */
+.actions {
+    white-space: nowrap;
+}
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-right: 0.5rem;
+    color: var(--memorys-secondary);
+}
+
+.action-btn[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.action-btn.view:hover   { color: #17a2b8; } /* bleu clair */
+.action-btn.edit:hover   { color: #ffc107; } /* jaune */
+.action-btn.delete:hover { color: #dc3545; } /* rouge */

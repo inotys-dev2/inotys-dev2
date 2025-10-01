@@ -1,0 +1,40 @@
+.sidebar a.active {
+    background-color: var(--memorys-accent);
+    color: var(--memorys-primary);
+}
+
+.sidebar {
+    background-color: #353d57;
+    color: #ccc;
+    width: 250px;
+    min-height: calc(100vh - 120px);
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h4 {
+    color: #F7B954;
+    margin-top: 20px;
+    margin-bottom: 5px;
+    text-decoration: underline;
+    font-family: "Poppins Medium", sans-serif;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    color: #ccc;
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+}
+
+.sidebar a:hover {
+    background-color: #2c3245;
+    color: white
+}
+
+.sidebar i { margin-right: 8px; }
+
+.layout { display: flex; }
