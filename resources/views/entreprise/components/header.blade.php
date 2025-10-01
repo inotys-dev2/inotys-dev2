@@ -1,57 +1,91 @@
 @php
+    // Tableau associatif reliant les segments de l’URL à un titre de page lisible
     $titles = [
         'dashboard'      => 'Dashboard',
         'agenda'         => 'Agenda',
         'paiement'       => 'Paiement',
         'admin'          => 'Administration',
     ];
+
+    // Récupération des segments de l’URL actuelle (ex: /entreprise/dashboard → ['entreprise', 'dashboard'])
     $segments = request()->segments();
+
+    // Variable pour stocker le segment correspondant à une clé connue
     $pageKey = null;
+
+    // Parcours des segments de l’URL pour trouver le premier qui correspond à une clé du tableau $titles
     foreach ($segments as $seg) {
         if (array_key_exists($seg, $titles)) {
             $pageKey = $seg;
-            break;
+            break; // On sort dès qu’on trouve une correspondance
         }
     }
+
+    // Détermination du titre de la page : si aucun segment trouvé, on met "Dashboard" par défaut
     $pageTitle = $titles[$pageKey] ?? 'Dashboard';
 @endphp
 
 <div class="header">
-    <!-- Logo + titre -->
+    <!-- ==================== LOGO + TITRE DE PAGE ==================== -->
     <div class="logo-header">
+        {{-- Logo de l’entreprise ou du site --}}
         <img src="{{ asset('/images/memorys_logo.png') }}" alt="Logo Memorys">
+
+        {{-- Titre de la page, déterminé dynamiquement selon l’URL --}}
         <h2>{{ $pageTitle }}</h2>
     </div>
 
-    <!-- Utilisateur -->
+    <!-- ==================== MENU UTILISATEUR ==================== -->
     <div class="user-menu" x-data="{ open: false }" @click.away="open = false">
+        {{--
+            Bouton qui ouvre le menu utilisateur (avec photo et nom)
+            - Utilise Alpine.js pour gérer l’état (open / fermé)
+        --}}
         <div class="user-menu__toggle" @click="open = !open" :aria-expanded="open.toString()">
+            {{-- Photo de profil de l’utilisateur connecté --}}
             <img src="{{ asset('/images/' . Auth::user()->profileImg) }}" alt="Photo de profil">
+
+            {{-- Nom complet de l’utilisateur --}}
             <div>
                 <span>{{ Auth::user()->prenom }} {{ Auth::user()->nom }}</span>
             </div>
+
+            {{-- Petite flèche vers le bas (icône SVG) pour indiquer le menu déroulant --}}
             <svg viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z"/>
             </svg>
         </div>
 
+        {{--
+            Menu déroulant : affiché uniquement lorsque "open = true"
+            - Transition animée grâce à Alpine.js (x-transition)
+            - x-cloak empêche le flash au chargement
+        --}}
         <div class="user-menu__dropdown" x-show="open" x-transition x-cloak>
+
+            {{-- Lien vers la page de profil utilisateur --}}
             <a href="{{ route('profile.edit') }}">
                 <svg fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
                 </svg>
                 Mon compte
             </a>
+
+            {{-- Bouton désactivé pour la messagerie (fonctionnalité à venir) --}}
             <button type="button" disabled>
                 <svg fill="currentColor" viewBox="0 0 24 24">
                     <path d="M2 4h20v16H2z" fill="none" stroke="currentColor" stroke-width="2"/>
                     <path d="M2 4l10 9 10-9" fill="none" stroke="currentColor" stroke-width="2"/>
                 </svg>
                 <span>Messagerie</span>
+
+                {{-- Badge indiquant le nombre de notifications si l’utilisateur en a --}}
                 @if(auth()->user()->notifications && auth()->user()->notifications->count() > 0)
-                    <span class="badge">{{auth()->user()->notifications->count()}}</span>
+                    <span class="badge">{{ auth()->user()->notifications->count() }}</span>
                 @endif
             </button>
+
+            {{-- Bouton de déconnexion via un formulaire POST sécurisé --}}
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit">

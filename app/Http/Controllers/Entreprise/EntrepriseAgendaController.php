@@ -15,6 +15,7 @@ class EntrepriseAgendaController extends Controller
 
     public function agenda($uuid) {
         $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
+        $paroisses = Paroisses::all();
         $ceremonies = DemandeCeremonie::with([
             'users_paroisses.user',   // pour officiant->user->prenom/nom
             'paroisse',         // pour paroisse->nom/adresse
@@ -59,7 +60,7 @@ class EntrepriseAgendaController extends Controller
                 'extendedProps' => $extended,
             ];
         });
-        return view('entreprise.agenda.view', compact('entreprise', 'events'));
+        return view('entreprise.agenda.view', compact('entreprise','paroisses', 'events'));
     }
 
     public function getWorkingDays(Request $request) {
@@ -98,14 +99,21 @@ class EntrepriseAgendaController extends Controller
             'date_ceremonie'            => 'required|date',
             'heure_ceremonie'           => 'required',
             'duree_minutes'             => 'nullable|integer',
-            'nom_contact_famille'       => 'required|string',
-            'telephone_contact_famille' => 'required|string',
+            'nom_contact_famille'       => 'nullable|string',
+            'telephone_contact_famille' => [
+                'nullable',
+                'regex:/^\+?[0-9\s\-]{6,20}$/'
+            ],
             'demandes_speciales'        => 'nullable|string',
         ]);
 
         // Gestion création vs mise à jour
         if ($request->filled('id')) {
             $demande = DemandeCeremonie::findOrFail($request->query('id'));
+
+            // Ajout du champ modifié par
+            $data['modifie_par'] = auth()->id();
+
             $demande->update($data);
             $message = 'Votre demande a bien été mise à jour.';
         } else {
@@ -114,6 +122,8 @@ class EntrepriseAgendaController extends Controller
             $data['cree_par']        = auth()->id();
             $data['statut']          = 'en_attente';
             $data['statut_paiement'] = 'en_attente';
+            $data['modifie_par']     = null; // par défaut
+
             DemandeCeremonie::create($data);
             $message = 'Votre demande a bien été envoyée.';
         }
@@ -122,6 +132,7 @@ class EntrepriseAgendaController extends Controller
             ->route('entreprise.agenda.view', ['uuid' => $uuid])
             ->with('success', $message);
     }
+
     public function showAllDemande(Request $request, $uuid)
     {
         // 1. Récupère l'entreprise

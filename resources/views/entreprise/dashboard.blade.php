@@ -1,4 +1,4 @@
-{{-- resources/views/entreprise/dashboard.blade.php --}}
+{{-- Page dashboard des entreprises --}}
 @extends('entreprise.layouts.app')
 
 @section('content')

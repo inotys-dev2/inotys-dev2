@@ -1,64 +1,81 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="UTF-8">
-        <title>Dashboard</title>
-        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<head>
+    <!-- Définition du charset et du titre de la page -->
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
 
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        @vite('resources/css/app.css')
+    <!-- Police et icônes -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-        <!-- Scripts -->
-        @vite('resources/css/app.css')
+    <!-- Jeton CSRF pour la sécurité des requêtes -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        @php
-            $theme = auth()->user()->theme;
-            $type = auth()->user()->access;
-            $paths = [
-              "resources/css/{$theme}/{$type}/main.css",
-            ];
-        @endphp
+    <!-- Feuille de style principale générée par Vite -->
+    @vite('resources/css/app.css')
 
-        @foreach ($paths as $path)
-            @if(file_exists(resource_path('css/'. $theme .'/'. $type .'/'. basename($path))))
-                @vite($path)
-            @endif
-        @endforeach
+    <!-- Chargement conditionnel du thème utilisateur -->
+    @php
+        $theme = auth()->user()->theme;  // Récupère le thème choisi par l'utilisateur
+        $type = auth()->user()->access;  // Récupère le type d'accès de l'utilisateur (rôle)
+        $paths = [
+          "resources/css/{$theme}/{$type}/main.css", // Chemin CSS basé sur le thème et le rôle
+        ];
+    @endphp
 
-    </head>
-    <style>
-        .sidebar-app { display: block; }
-        .navbar-app  { display: none;  }
+        <!-- Inclusion dynamique du fichier CSS correspondant si présent -->
+    @foreach ($paths as $path)
+        @if(file_exists(resource_path('css/'. $theme .'/'. $type .'/'. basename($path))))
+            @vite($path)
+        @endif
+    @endforeach
 
+</head>
+<style>
+    /* Affichage par défaut */
+    .sidebar-app { display: block; }
+    .navbar-app  { display: none;  }
 
-        @media (max-width: 1150px) {
-            .sidebar-app {
-                display: none;
-            }
-            .navbar-app  { display: block;}
+    /* Adaptation responsive : en dessous de 1150px, on cache la sidebar et on affiche la navbar mobile */
+    @media (max-width: 1150px) {
+        .sidebar-app {
+            display: none;
         }
+        .navbar-app  { display: block;}
+    }
+</style>
 
-    </style>
-    <body>
+<body>
 
-    @include('paroisses.components.header')
+<!-- Inclusion de l'en-tête -->
+@include('paroisses.components.header')
 
-    <div class="layout">
-        <div class="sidebar-app">
-            @include('paroisses.components.sidebar')
-        </div>
-        <div class="navbar-app">
-            @include('paroisses.components.navbars')
-        </div>
-        <div class="main-content">
-            @yield('content')
-        </div>
+<!-- Structure principale de la page -->
+<div class="layout">
+    <!-- Sidebar visible sur grand écran -->
+    <div class="sidebar-app">
+        @include('paroisses.components.sidebar')
     </div>
 
-    @include('paroisses.components.footer')
+    <!-- Navbar visible sur petit écran -->
+    <div class="navbar-app">
+        @include('paroisses.components.navbars')
+    </div>
 
-    <script src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
-    @vite('resources/js/app.js')
-    </body>
+    <!-- Contenu principal -->
+    <div class="main-content">
+        @yield('content') <!-- Contenu injecté par les vues enfants -->
+    </div>
+</div>
+
+<!-- Inclusion du pied de page -->
+@include('paroisses.components.footer')
+
+<!-- Script Alpine.js pour les composants interactifs -->
+<script src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
+
+<!-- Script principal compilé avec Vite -->
+@vite('resources/js/app.js')
+</body>
 </html>
