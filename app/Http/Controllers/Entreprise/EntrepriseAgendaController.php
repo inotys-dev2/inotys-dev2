@@ -9,6 +9,7 @@ use App\Models\Paroisses;
 use App\Models\UtilisateurParoisse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EntrepriseAgendaController extends Controller
 {
@@ -133,41 +134,26 @@ class EntrepriseAgendaController extends Controller
             ->with('success', $message);
     }
 
-    public function showAllDemande(Request $request, $uuid)
-    {
-        // 1. Récupère l'entreprise
+    public function showAllDemande($uuid) {
         $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
 
-        // 2. Prépare la requête de base
-        $query = DemandeCeremonie::where('entreprise_id', $entreprise->id);
+        $order = ['acceptee', 'en_attente', 'refusee', 'passee'];
+        $demandes = DemandeCeremonie::where('entreprise_id', $entreprise->id)
+            ->orderByRaw("FIELD(statut, '".implode("','", $order)."')")
+            ->get();
 
-        if ($request->filled('paroisses')) {
-            $query->where('paroisses_id', $request->input('paroisses'));
-        }
-        // 3. Récupère toutes les demandes
-        $toutesDemandes = $query->get();
+        $counts = DemandeCeremonie::where('entreprise_id', $entreprise->id)
+            ->select('paroisses_id', DB::raw('COUNT(*) AS total'))
+            ->groupBy('paroisses_id')
+            ->pluck('total', 'paroisses_id');
 
-        // 4. Sépare en deux collections selon le statut
-        $demandesConfirmees = $toutesDemandes
-            ->filter(fn($d) => $d->statut === 'acceptee');
-
-        $demandesEnAttente = $toutesDemandes
-            ->filter(fn($d) => $d->statut === 'en_attente');
-
-        $demandesPasseeOuAnnulee = $toutesDemandes
-            ->filter(fn($d) => $d->statut === 'passee' || $d->statut === 'refusee');
-
-        // 5. Charge la liste des paroisses pour le select
         $paroisses = Paroisses::all();
 
-        // 6. Passe tout à la vue
         return view('entreprise.agenda.demandes', compact(
             'entreprise',
-            'demandesConfirmees',
-            'demandesEnAttente',
-            'demandesPasseeOuAnnulee',
+            'demandes',
             'paroisses',
-            'uuid'
+            'counts'
         ));
     }
     public function detailDemande($id)

@@ -42,6 +42,19 @@
     @endforeach
 </head>
 <body>
+<style>
+    /* Affichage par défaut */
+    .sidebar-app { display: block; }
+    .navbar-app  { display: none;  }
+
+    /* Adaptation responsive : en dessous de 1150px, on cache la sidebar et on affiche la navbar mobile */
+    @media (max-width: 1150px) {
+        .sidebar-app {
+            display: none;
+        }
+        .navbar-app  { display: block;}
+    }
+</style>
 
 {{--
     Inclusion du header commun à toutes les pages entreprises.
@@ -49,22 +62,23 @@
 --}}
 @include('entreprise.components.header')
 
+<!-- Structure principale de la page -->
 <div class="layout">
-    {{--
-        Inclusion de la sidebar (menu latéral).
-        Contient les liens de navigation vers les différentes sections du dashboard.
-    --}}
-    @include('entreprise.components.sidebar')
+    <!-- Sidebar visible sur grand écran -->
+    <div class="sidebar-app">
+        @include('entreprise.components.sidebar')
+    </div>
 
-    {{--
-        Zone principale de contenu.
-        Le contenu spécifique à chaque page sera injecté ici avec @yield('content').
-    --}}
+    <!-- Navbar visible sur petit écran -->
+    <div class="navbar-app">
+        @include('entreprise.components.navbars')
+    </div>
+
+    <!-- Contenu principal -->
     <div class="main-content">
-        @yield('content')
+        @yield('content') <!-- Contenu injecté par les vues enfants -->
     </div>
 </div>
-
 {{--
     Inclusion du footer commun.
     Peut contenir les informations légales, les liens de contact, etc.

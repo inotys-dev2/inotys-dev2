@@ -6,6 +6,7 @@
 @import './calendar.css';
 @import './demandes.css';
 @import './dashboard.css';
+@import "./components/main-content.css";
 
 * {
     margin: 0;

@@ -1,8 +1,8 @@
-@import "dashboard/header.css";
-@import "dashboard/navbars.css";
-@import "dashboard/sidebars.css";
-@import "dashboard/footer.css";
-@import "dashboard/main-content.css";
+@import "components/header.css";
+@import "components/navbars.css";
+@import "components/sidebars.css";
+@import "components/footer.css";
+@import "components/main-content.css";
 @import "agenda/view.css";
 @import "agenda/demandes.css";
 

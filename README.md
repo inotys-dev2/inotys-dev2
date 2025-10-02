@@ -76,34 +76,22 @@ L’application sera accessible sur :
 
 ## 👥 Rôles utilisateurs
 
-| Rôle           | Accès principal                                                        |
-|----------------|------------------------------------------------------------------------|
-| **Admin**        | Gestion des utilisateurs, des rôles, des paroisses, officiants, etc. |
-| **Entreprise**   | Réservation de cérémonies, gestion de leurs créneaux disponibles     |
-| **Officiant**    | Consultation de ses créneaux et des réservations                     |
+| Rôle              | Accès principal | Description                                                           |
+|-------------------|-----------------|-----------------------------------------------------------------------|
+| **Admin**         | Administration  | Gestion des utilisateurs, des rôles, des paroisses, officiants, etc.  |
+| **Entreprise**    | Entreprise | Réservation de cérémonies, gestion de leurs créneaux disponibles      |
+| **Officiant & Bénévole** |  Paroisses | Consultation de ses créneaux et des réservations                      |
 
 ---
 
 ## 📬 Fonctionnalités principales
 
 - ✅ Authentification sécurisée avec **Laravel Breeze**
-- ✅ Vérification **par e-mail avec code**
 - ✅ Tableau de bord personnalisé selon le rôle
 - ✅ Gestion des **cérémonies** (paroisse, date, officiant, entreprise)
 - ✅ Notifications automatiques
-- ✅ Paiements (à venir)
+-  Paiements (à venir)
 - ✅ Gestion des disponibilités des officiants
-- ✅ Interface propre et intuitive avec **TailwindCSS**
-
----
-
-## ✉️ Vérification d’e-mail (processus)
-
-1. Lorsqu’un utilisateur s’inscrit, un **code de vérification** est automatiquement généré.
-2. Ce code est envoyé par e-mail à l’adresse fournie.
-3. L’utilisateur doit saisir le code pour **activer son compte**.
-4. Une fois validé, le compte est marqué comme **vérifié** et l’accès complet est accordé.
-5. Si le code est incorrect ou expiré, un nouveau peut être renvoyé.
 
 ---
 
@@ -117,10 +105,8 @@ L’application sera accessible sur :
   php artisan migrate --seed
 
 # Recompiler les assets front-end 
-  npm run dev
-
 # Mettre le serveur Laravel en route
-  php artisan serve
+  npm run dev:all
 ```
 
 ---
