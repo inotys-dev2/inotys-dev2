@@ -13,7 +13,7 @@ class UtilisateurEntrepriseSeeder extends Seeder
 {
     public function run(): void
     {
-        $entreprise = Entreprises::first() ?? Entreprises::factory()->create();
+        /*$entreprise = Entreprises::first() ?? Entreprises::factory()->create();
 
         // Création d’un responsable
         $userResp = User::factory()->create();
@@ -41,6 +41,6 @@ class UtilisateurEntrepriseSeeder extends Seeder
         UtilisateurPermission::factory()
             ->for($userMembre, 'user')
             ->for($entreprise, 'entreprise')
-            ->create();
+            ->create();*/
     }
 }

@@ -5,7 +5,7 @@
         <i class="fas fa-home"></i> Dashboard
     </a>
 
-    <h4>GESTION DES CÉRÉMONIES</h4>
+    <h5>GESTION DES CÉRÉMONIES</h5>
 
     {{-- Agenda --}}
     <a href="{{ route('entreprise.agenda.view', ['uuid' => $entreprise->uuid]) }}"
@@ -17,7 +17,7 @@
         <i class="fas fa-envelope"></i> Demandes
     </a>
 
-    <h4>GESTION DES PAIEMENTS</h4>
+    <h5>GESTION DES PAIEMENTS</h5>
 
     <a href="{{ route('entreprise.paiement.creation_devis', ['uuid' => $entreprise->uuid]) }}"
        class="@activeClass('entreprise.paiement.creation_devis')">
@@ -36,7 +36,7 @@
         <i class="fas fa-history"></i> Historique de paiements
     </a>
 
-    <h4>ADMINISTRATION</h4>
+    <h5>ADMINISTRATION</h5>
 
     <a href="{{ route('entreprise.admin.profile', ['uuid' => $entreprise->uuid]) }}"
        class="@activeClass('entreprise.admin.profile')">

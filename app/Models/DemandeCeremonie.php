@@ -2,99 +2,161 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\HttpFoundation\Request;
 
 class DemandeCeremonie extends Model
 {
-    use HasFactory;
-
-    public $timestamps = true;
-
-    protected $table = 'demande_ceremonies';
-
-    // Pour que ces colonnes soient des Carbon instances :
-    protected $dates = [
-        'date_ceremonie',
-        'heure_ceremonie',
-    ];
+    // Si ta table suit la convention (demande_ceremonies), inutile de préciser $table.
 
     protected $fillable = [
         'entreprise_id',
-        'paroisses_id',
-        'users_paroisse_id',
-        'nom_defunt',
-        'date_ceremonie',
-        'heure_ceremonie',
-        'duree_minutes',
-        'nom_contact_famille',
-        'telephone_contact_famille',
-        'demandes_speciales',
+        'user_entreprise_id',
+        'paroisse_id',
+        'users_paroisses_id',
+        'assigned_user_id',
+        'deceased_name',
+        'ceremony_date',
+        'ceremony_hour',
+        'duration_time',
+        'contact_family_name',
+        'telephone_contact_family',
+        'special_requests',
         'statut',
-        'montant',
+        'sum',
         'statut_paiement',
-        'cree_par',
+        'score',
+        'cancel_reason',
     ];
 
     protected $casts = [
-        'date_ceremonie' => 'date',
-        'heure_ceremonie' => 'datetime:H:i',
-        'montant' => 'decimal:2',
+        'ceremony_date'     => 'date',       // Y-m-d
+        // Laravel n’a pas de cast "time" natif : on garde string pour ceremony_hour
+        'duration_time'     => 'integer',
+        'sum'               => 'decimal:2',
+        'score'             => 'integer',
+        'created_at'        => 'datetime',
+        'updated_at'        => 'datetime',
     ];
 
-    public function paiement() { return $this->hasOne(Paiement::class, 'demande_ceremonie_id'); }
+    // Attribut virtuel (appended) combinant date + heure en instance Carbon
+    protected $appends = ['ceremony_at'];
 
+    /* ---------------------------------
+     | Relations
+     |----------------------------------*/
 
-    // Relations
     public function entreprise()
     {
-        return $this->belongsTo(Entreprises::class, 'entreprise_id');
+        return $this->belongsTo(Entreprises::class);
+    }
+
+    public function userEntreprise()
+    {
+        return $this->belongsTo(User::class, 'user_entreprise_id');
     }
 
     public function paroisse()
     {
-        return $this->belongsTo(Paroisses::class, 'paroisses_id');
+        return $this->belongsTo(Paroisses::class);
     }
 
-    public function users_paroisses()
+    public function userParoisse()
     {
         return $this->belongsTo(UtilisateurParoisse::class, 'users_paroisses_id');
     }
 
-    public function createur()
+    public function assignedUser()
     {
-        return $this->belongsTo(User::class, 'cree_par');
+        return $this->belongsTo(User::class, 'assigned_user_id');
     }
 
-    public function notifications()
+    /* ---------------------------------
+     | Accessors / Mutators
+     |----------------------------------*/
+
+    // Retourne la date+heure sous forme Carbon (null-safe)
+    public function getCeremonyAtAttribute(): ?Carbon
     {
-        return $this->hasMany(Notification::class, 'demande_ceremonie_id');
+        if (!$this->ceremony_date || !$this->ceremony_hour) {
+            return null;
+        }
+
+        // ceremony_hour peut être "HH:MM[:SS]" -> on normalise
+        $hour = strlen($this->ceremony_hour) === 5 ? $this->ceremony_hour . ':00' : $this->ceremony_hour;
+
+        return Carbon::parse($this->ceremony_date->format('Y-m-d') . ' ' . $hour);
     }
 
-    public function store(Request $request)
+    // (Optionnel) Force un format HH:MM en entrée
+    public function setCeremonyHourAttribute($value): void
     {
-        $data = $request->validate([
-            'entreprise_id'             => 'required|exists:entreprises,id',
-            'paroisses_id'              => 'required|exists:paroisses,id',
-            'officiant_id'              => 'required|exists:officiants,id',
-            'nom_defunt'                => 'required|string',
-            'date_ceremonie'            => 'required|date',
-            'heure_ceremonie'           => 'required|date_format:H:i',
-            'duree_minutes'             => 'required|integer',
-            'nom_contact_famille'       => 'required|string',
-            'telephone_contact_famille' => 'required|string',
-            'demandes_speciales'        => 'nullable|string',
-            'statut'                    => 'nullable|string',
-            'montant'                   => 'nullable|numeric',
-            'statut_paiement'           => 'nullable|string',
-            'cree_par'                  => 'required|exists:users,id',
-        ]);
+        if (empty($value)) {
+            $this->attributes['ceremony_hour'] = null;
+            return;
+        }
 
-        // Création rapide grâce à la méthode statique create()
-        $demande = DemandeCeremonie::create($data);
+        // Accepte "9:5", "09:5", "09:05", "09:05:00"
+        $time = substr($value, 0, 8); // max HH:MM:SS
+        $parts = explode(':', $time);
+        $h = str_pad($parts[0] ?? '00', 2, '0', STR_PAD_LEFT);
+        $m = str_pad($parts[1] ?? '00', 2, '0', STR_PAD_LEFT);
 
-        // … redirection ou retour JSON, etc.
-        return redirect()->route('entreprise.agenda.demande', $demande);
+        $this->attributes['ceremony_hour'] = "$h:$m";
+    }
+
+    /* ---------------------------------
+     | Scopes pratiques
+     |----------------------------------*/
+
+    public function scopeStatus(Builder $q, string $status): Builder
+    {
+        return $q->where('statut', $status);
+    }
+
+    public function scopePaymentStatus(Builder $q, string $status): Builder
+    {
+        return $q->where('statut_paiement', $status);
+    }
+
+    public function scopeForEntreprise(Builder $q, int $entrepriseId): Builder
+    {
+        return $q->where('entreprise_id', $entrepriseId);
+    }
+
+    public function scopeAssignedTo(Builder $q, int $userId): Builder
+    {
+        return $q->where('assigned_user_id', $userId);
+    }
+
+    // Entre deux dates (basé sur ceremony_date)
+    public function scopeBetweenDates(Builder $q, $from, $to): Builder
+    {
+        return $q->whereBetween('ceremony_date', [$from, $to]);
+    }
+
+    // À venir (date > aujourd’hui ou aujourd’hui avec heure future)
+    public function scopeUpcoming(Builder $q): Builder
+    {
+        $today = Carbon::today();
+        return $q->where(function ($sub) use ($today) {
+            $sub->where('ceremony_date', '>', $today)
+                ->orWhere(function ($sub2) use ($today) {
+                    $sub2->whereDate('ceremony_date', $today)
+                        ->where('ceremony_hour', '>=', now()->format('H:i'));
+                });
+        });
+    }
+
+    public function scopeSearch(Builder $q, ?string $term): Builder
+    {
+        if (!$term) return $q;
+
+        return $q->where(function ($sub) use ($term) {
+            $sub->where('deceased_name', 'like', "%$term%")
+                ->orWhere('contact_family_name', 'like', "%$term%")
+                ->orWhere('telephone_contact_family', 'like', "%$term%");
+        });
     }
 }

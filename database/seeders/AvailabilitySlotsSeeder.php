@@ -9,12 +9,12 @@ class AvailabilitySlotsSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1) Récupère tous les IDs de paroisses
-        $paroisseIds = DB::table('paroisses')->pluck('id')->values();
+       /* // 1) Récupère tous les IDs de paroisses
+        $paroisseIds = DB::table('paroisse')->pluck('id')->values();
 
         // 2) Vide la table
         DB::table('availability_slots')
-            ->whereIn('paroisses_id', $paroisseIds)
+            ->whereIn('paroisse_id', $paroisseIds)
             ->delete();
 
         $dowGroups = [];
@@ -43,11 +43,11 @@ class AvailabilitySlotsSeeder extends Seeder
             $end     = sprintf('%02d:%02d:00', $endHour, $minute);
 
             DB::table('availability_slots')->insert([
-                'paroisses_id' => $paroisseId,
+                'paroisse_id' => $paroisseId,
                 'day_of_week'  => json_encode($selectedDays),   // chaîne "2,3,5,6,7"
                 'start_time'   => $start,
                 'end_time'     => $end,
             ]);
-        }
+        }*/
     }
 }

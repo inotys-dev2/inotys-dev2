@@ -13,76 +13,74 @@ use Illuminate\Support\Facades\DB;
 
 class EntrepriseAgendaController extends Controller
 {
-
-    public function agenda($uuid) {
+    public function agenda($uuid)
+    {
         $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
-        $paroisses = Paroisses::all();
+        $parishes = Paroisses::all();
+
         $ceremonies = DemandeCeremonie::with([
-            'users_paroisses.user',   // pour officiant->user->prenom/nom
-            'paroisse',         // pour paroisse->nom/adresse
-            'createur'           // pour creator->prenom/nom
+            'userParoisse.user',
+            'paroisse',
+            'userEntreprise'
         ])->where('entreprise_id', $entreprise->id)->get();
 
-        $events = $ceremonies->map(function (DemandeCeremonie $c) {
-            // reconstitution de la date/heure
-            $heureNorm   = Carbon::parse($c->heure_ceremonie)->format('H:i:s');
-            $dateHeure   = $c->date_ceremonie->format('Y-m-d') . ' ' . $heureNorm;
-            $startCarbon = Carbon::createFromFormat('Y-m-d H:i:s', $dateHeure);
+        $events = $ceremonies->map(function (DemandeCeremonie $ceremony) {
+            $hourNormalized = Carbon::parse($ceremony->ceremony_hour)->format('H:i:s');
+            $datetime = $ceremony->ceremony_date->format('Y-m-d') . ' ' . $hourNormalized;
+            $start = Carbon::createFromFormat('Y-m-d H:i:s', $datetime);
 
-            // propriétés communes
             $extended = [
-                'nomContactFamille'  => $c->nom_contact_famille,
-                'telContactFamille'  => $c->telephone_contact_famille,
-                'paroisseId'         => $c->paroisse->id,
-                'paroisseNom'        => $c->paroisse->name,
-                'paroissePhone'      => $c->paroisse->phone,
-                'demandesSpeciales'  => $c->demandes_speciales,
-                'montant'            => $c->montant,
-                'statutPaiement'     => $c->statut_paiement,
-                'creeParPrenom'      => $c->createur->prenom,
-                'creeParNom'         => $c->createur->nom,
-                'created_at'         => $c->created_at->toDateTimeString(),
-                'updated_at'         => $c->updated_at->toDateTimeString(),
+                'familyContactName'  => $ceremony->contact_family_name,
+                'familyContactPhone' => $ceremony->telephone_contact_family,
+                'parishId'           => $ceremony->paroisse->id,
+                'parishName'         => $ceremony->paroisse->name,
+                'parishPhone'        => $ceremony->paroisse->phone,
+                'specialRequests'    => $ceremony->special_requests,
+                'amount'             => $ceremony->sum,
+                'paymentStatus'      => $ceremony->statut_paiement,
+                'createdByFirstName' => $ceremony->userEntreprise->prenom,
+                'createdByLastName'  => $ceremony->userEntreprise->nom,
+                'created_at'         => $ceremony->created_at->toDateTimeString(),
+                'updated_at'         => $ceremony->updated_at->toDateTimeString(),
             ];
 
-            // on n'ajoute officiant que s'il existe
-            if ($c->officiant && $c->officiant->user) {
-                $extended['officiantPrenom'] = $c->officiant->user->prenom;
-                $extended['officiantNom']    = $c->officiant->user->nom;
+            if ($ceremony->userParoisse && $ceremony->userParoisse->user) {
+                $extended['officiantFirstName'] = $ceremony->userParoisse->user->prenom;
+                $extended['officiantLastName']  = $ceremony->userParoisse->user->nom;
             }
 
             return [
-                'id'            => $c->id,
-                'title'         => $c->nom_defunt . ($c->statut ? " ({$c->statut})" : ''),
-                'start'         => $startCarbon->toIso8601String(),
-                'end'           => $startCarbon->copy()
-                    ->addMinutes($c->duree_minutes)
-                    ->toIso8601String(),
+                'id'            => $ceremony->id,
+                'title'         => $ceremony->deceased_name . ($ceremony->statut ? " ({$ceremony->statut})" : ''),
+                'start'         => $start->toIso8601String(),
+                'end'           => $start->copy()->addMinutes($ceremony->duration_time)->toIso8601String(),
                 'extendedProps' => $extended,
             ];
         });
-        return view('entreprise.agenda.view', compact('entreprise','paroisses', 'events'));
+
+        return view('entreprise.agenda.view', compact('entreprise', 'parishes', 'events'));
     }
 
-    public function getWorkingDays(Request $request) {
+    public function getWorkingDays(Request $request)
+    {
         $validated = $request->validate([
-            'paroisseId' => ['required', 'integer', 'exists:paroisses,id'],
+            'parishId' => ['required', 'integer', 'exists:paroisses,id'],
         ]);
-        $paroisse = Paroisses::findOrFail($validated['paroisseId']);
 
-        $slots = $paroisse->availabilitySlots()->select('day_of_week', 'start_time', 'end_time')->get();
-        $businessHours = $slots->flatMap(function($slot) {
-            $jours = $slot->day_of_week !== null
-                ? [(int) $slot->day_of_week]
-                : range(0, 6);
+        $parish = Paroisses::findOrFail($validated['parishId']);
 
-            // Pour chaque jour, on génère une entrée séparée
-            return collect($jours)->map(fn($d) => [
-                'startTime'  => Carbon::parse($slot->start_time)->format('H:i'),
-                'endTime'    => Carbon::parse($slot->end_time)->format('H:i'),
+        $slots = $parish->availabilitySlots()->select('day_of_week', 'start_time', 'end_time')->get();
+
+        $businessHours = $slots->flatMap(function ($slot) {
+            $days = $slot->day_of_week !== null ? [(int) $slot->day_of_week] : range(0, 6);
+
+            return collect($days)->map(fn($d) => [
+                'startTime' => Carbon::parse($slot->start_time)->format('H:i'),
+                'endTime'   => Carbon::parse($slot->end_time)->format('H:i'),
             ]);
         })->values();
-        $businessDays = $paroisse->availabilitySlots()->select('day_of_week')->get();
+
+        $businessDays = $parish->availabilitySlots()->select('day_of_week')->get();
 
         return response()->json([
             'businessHours' => $businessHours,
@@ -92,41 +90,32 @@ class EntrepriseAgendaController extends Controller
 
     public function envoyer(Request $request, $uuid)
     {
-        $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
+        $company = Entreprises::where('uuid', $uuid)->firstOrFail();
 
         $data = $request->validate([
-            'paroisses_id'              => 'required|exists:paroisses,id',
-            'nom_defunt'                => 'required|string',
-            'date_ceremonie'            => 'required|date',
-            'heure_ceremonie'           => 'required',
-            'duree_minutes'             => 'nullable|integer',
-            'nom_contact_famille'       => 'nullable|string',
-            'telephone_contact_famille' => [
-                'nullable',
-                'regex:/^\+?[0-9\s\-]{6,20}$/'
-            ],
-            'demandes_speciales'        => 'nullable|string',
+            'paroisse_id'              => 'required|exists:paroisses,id',
+            'deceased_name'            => 'required|string',
+            'ceremony_date'            => 'required|date',
+            'ceremony_hour'            => 'required',
+            'duration_time'            => 'nullable|integer',
+            'contact_family_name'      => 'nullable|string',
+            'telephone_contact_family' => ['nullable', 'regex:/^\+?[0-9\s\-]{6,20}$/'],
+            'special_requests'         => 'nullable|string',
         ]);
 
-        // Gestion création vs mise à jour
         if ($request->filled('id')) {
-            $demande = DemandeCeremonie::findOrFail($request->query('id'));
-
-            // Ajout du champ modifié par
-            $data['modifie_par'] = auth()->id();
-
-            $demande->update($data);
-            $message = 'Votre demande a bien été mise à jour.';
+            $ceremony = DemandeCeremonie::findOrFail($request->query('id'));
+            $ceremony->update($data);
+            $message = 'The request has been updated successfully.';
         } else {
-            // Création : on complète les champs manquants
-            $data['entreprise_id']   = $entreprise->id;
-            $data['cree_par']        = auth()->id();
-            $data['statut']          = 'en_attente';
-            $data['statut_paiement'] = 'en_attente';
-            $data['modifie_par']     = null; // par défaut
+            $data['entreprise_id']      = $company->id;
+            $data['user_entreprise_id'] = auth()->id();
+            $data['statut']             = 'waiting';
+            $data['statut_paiement']    = 'define';
+            $data['duration_time']      = $data['duration_time'] ?? 60;
 
             DemandeCeremonie::create($data);
-            $message = 'Votre demande a bien été envoyée.';
+            $message = 'The request has been created successfully.';
         }
 
         return redirect()
@@ -134,58 +123,52 @@ class EntrepriseAgendaController extends Controller
             ->with('success', $message);
     }
 
-    public function showAllDemande($uuid) {
+    public function showAllRequests($uuid)
+    {
         $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
 
-        $order = ['acceptee', 'en_attente', 'refusee', 'passee'];
-        $demandes = DemandeCeremonie::where('entreprise_id', $entreprise->id)
-            ->orderByRaw("FIELD(statut, '".implode("','", $order)."')")
+        $statusOrder = ['treatment', 'waiting', 'accepted', 'canceled', 'passed'];
+        $requests = DemandeCeremonie::where('entreprise_id', $entreprise->id)
+            ->orderByRaw("FIELD(statut, '".implode("','", $statusOrder)."')")
             ->get();
 
         $counts = DemandeCeremonie::where('entreprise_id', $entreprise->id)
-            ->select('paroisses_id', DB::raw('COUNT(*) AS total'))
-            ->groupBy('paroisses_id')
-            ->pluck('total', 'paroisses_id');
+            ->select('paroisse_id', DB::raw('COUNT(*) AS total'))
+            ->groupBy('paroisse_id')
+            ->pluck('total', 'paroisse_id');
 
-        $paroisses = Paroisses::all();
+        $parishes = Paroisses::all();
 
-        return view('entreprise.agenda.demandes', compact(
-            'entreprise',
-            'demandes',
-            'paroisses',
-            'counts'
-        ));
+        return view('entreprise.agenda.demandes', compact('entreprise', 'requests', 'parishes', 'counts'));
     }
-    public function detailDemande($id)
+
+    public function showRequestDetail($id)
     {
-        $demande = DemandeCeremonie::where('id', $id)->firstOrFail();
-        return view('entreprise.agenda.components.demandes.details', compact('demande'));
+        $requestItem = DemandeCeremonie::where('id', $id)->firstOrFail();
+        return view('entreprise.agenda.components.demandes.details', compact('requestItem'));
     }
 
     public function showForm(Request $request, $uuid)
     {
         $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
-        $paroisses  = Paroisses::all();                                 // TOUJOURS charger toutes les paroisses
-        $officiants = UtilisateurParoisse::with('user')->get();                   // TOUJOURS charger tous les officiants
+        $parishes = Paroisses::all();
+        $officiants = UtilisateurParoisse::with('user')->get();
 
-        $demande = null;
+        $ceremony = null;
         if ($request->filled('id')) {
-            // Mode édition : charger la demande existante
-            $demande = DemandeCeremonie::findOrFail($request->query('id'));
+            $ceremony = DemandeCeremonie::findOrFail($request->query('id'));
         }
 
-        // Déterminer les valeurs par défaut du formulaire
-        if ($demande) {
-            $defaultDate     = $demande->date_ceremonie->format('Y-m-d');
-            $defaultTime     = $demande->heure_ceremonie->format('H:i');
-            $defaultDuration = $demande->duree_minutes;
-
+        if ($ceremony) {
+            $defaultDate     = $ceremony->ceremony_date->format('Y-m-d');
+            $defaultTime     = $ceremony->ceremony_hour;
+            $defaultDuration = $ceremony->duration_time;
         } elseif ($request->filled('start') && $request->filled('end')) {
-            $dtStart = Carbon::parse(str_replace(' ', '+', $request->query('start')));
-            $dtEnd   = Carbon::parse(str_replace(' ', '+', $request->query('end')));
-            $defaultDate     = $dtStart->toDateString();
-            $defaultTime     = $dtStart->format('H:i');
-            $defaultDuration = $dtStart->diffInMinutes($dtEnd);
+            $start = Carbon::parse(str_replace(' ', '+', $request->query('start')));
+            $end   = Carbon::parse(str_replace(' ', '+', $request->query('end')));
+            $defaultDate     = $start->toDateString();
+            $defaultTime     = $start->format('H:i');
+            $defaultDuration = $start->diffInMinutes($end);
         } else {
             $defaultDate     = now()->format('Y-m-d');
             $defaultTime     = now()->format('H:i');
@@ -194,9 +177,9 @@ class EntrepriseAgendaController extends Controller
 
         return view('entreprise.agenda.demande', compact(
             'entreprise',
-            'paroisses',
+            'parishes',
             'officiants',
-            'demande',
+            'ceremony',
             'defaultDate',
             'defaultTime',
             'defaultDuration'

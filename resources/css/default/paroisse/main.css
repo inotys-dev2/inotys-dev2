@@ -3,7 +3,8 @@
 @import "components/sidebars.css";
 @import "components/footer.css";
 @import "components/main-content.css";
-@import "agenda/view.css";
+/**@import "agenda/view.css";*/
+@import "agenda/calendar.css";
 @import "agenda/demandes.css";
 
 * {

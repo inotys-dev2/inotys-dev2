@@ -15,7 +15,7 @@ use App\Http\Controllers\Paroisses\ParoissesProfileController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\CalendarController;
 
 
 /**
@@ -30,7 +30,7 @@ Route::get('/', function () {
  * Route dashboard qui permet de rediriger l'utilisateur via son access* definie.
  * puis dans la bonne entreprise ou paroisse via l'uuid definie par l'entreprise lors de sa création.
  *
- * Access: récuperation de l'access via la base de donnée (admin, entreprise, paroisses)
+ * Access: récuperation de l'access via la base de donnée (entreprise, paroisse)
  *
  * En cas d'erreur il reviendra forcement sur /dashboard.
  */
@@ -42,7 +42,7 @@ Route::middleware(['auth'])->get('/dashboard', function () {
         'entreprise' => redirect()->route('entreprise.dashboard', [
             'uuid' => $user->entreprises->first()?->uuid,
         ]),
-        'paroisses' => redirect()->route('paroisses.dashboard', [
+        'paroisse' => redirect()->route('paroisses.dashboard', [
             'uuid' => $user->paroisses->first()?->uuid,
         ]),
         default => abort(403),
@@ -50,8 +50,7 @@ Route::middleware(['auth'])->get('/dashboard', function () {
 })->name('dashboard');
 
 
-/**
- * Route debug (Logout)
+/** Route debug (Logout)
  *
  * Permet au développeur de tester rapidement une déconnexion.
  * Redirection /
@@ -105,28 +104,38 @@ Route::middleware(['auth', 'access:entreprise'])->group(function () {
      Route::get('entreprise/{uuid}/admin/parametre',         [EntrepriseAdminController::class, 'parameters'])->name('entreprise.admin.parametre');
      Route::get('entreprise/{uuid}/admin/membres',           [EntrepriseAdminController::class, 'membres'])->name('entreprise.admin.membres');
      Route::get('entreprise/{uuid}/admin/logs',              [EntrepriseAdminController::class, 'logs'])->name('entreprise.admin.logs');
+
+    Route::prefix('entreprise/{uuid}/agenda/calendar')->group(function () {
+        Route::get('/', [CalendarController::class, 'index'])->defaults('scope', 'entreprise')->name('entreprise.calendar');
+        Route::get('/events',   [CalendarController::class, 'events'])->defaults('scope', 'entreprise')->name('entreprise.calendar.events');
+        Route::post('/events',  [CalendarController::class, 'store'])->defaults('scope', 'entreprise')->name('entreprise.calendar.store');
+        Route::patch('/events/{ceremony}',  [CalendarController::class, 'update'])->whereNumber('ceremony')->defaults('scope', 'entreprise')->name('entreprise.calendar.update');
+        Route::delete('/events/{ceremony}', [CalendarController::class, 'destroy'])->whereNumber('ceremony')->defaults('scope', 'entreprise')->name('entreprise.calendar.destroy');
+    });
 });
 
 /**
  * Route exclusivement pour les utilisateurs de paroisse obligatoirement connectées
  */
-Route::middleware(['auth', 'access:paroisses'])->group(function () {
-    Route::get('paroisses/{uuid}/dashboard',                 [ParoissesController::class, 'dashboard'])->name('paroisses.dashboard');
-    Route::get('paroisses/{uuid}/agenda',                    [ParoissesAgendaController::class, 'agenda'])->name('paroisses.agenda');
-    Route::get('paroisses/{uuid}/demandes',                  [ParoissesDemandesController::class, 'index'])->name('paroisses.demandes');
-    Route::get('paroisses/{uuid}/paiement',                  [ParoissesPaiementController::class, 'index'])->name('paroisses.paiement');
-    Route::get('paroisses/{uuid}/admin/parametre',           [ParoissesParametreController::class, 'index'])->name('paroisses.parametre');
-    Route::post('paroisses/{uuid}/admin/parametre',          [ParoissesParametreController::class, 'update'])->name('paroisses.parametre.update');
-    Route::get('paroisses/{uuid}/admin/profile',             [ParoissesProfileController::class, 'show'])->name('paroisses.profile');
-    Route::post('paroisses/{uuid}/admin/profile',            [ParoissesProfileController::class, 'update'])->name('paroisses.profile.update');
+Route::middleware(['auth', 'access:paroisse'])->group(function () {
+    Route::get('paroisses/{uuid}/dashboard',                     [ParoissesController::class, 'dashboard'])        ->name('paroisses.dashboard');
+    Route::get('paroisses/{uuid}/demandes',                      [ParoissesDemandesController::class, 'index'])    ->name('paroisses.demandes');
+    Route::get('paroisses/{uuid}/paiement',                      [ParoissesPaiementController::class, 'index'])    ->name('paroisses.paiement');
+    Route::get('paroisses/{uuid}/admin/parametre',               [ParoissesParametreController::class, 'index'])   ->name('paroisses.parametre');
+    Route::post('paroisses/{uuid}/admin/parametre',              [ParoissesParametreController::class, 'update'])  ->name('paroisses.parametre.update');
+    Route::get('paroisses/{uuid}/admin/profile',                 [ParoissesProfileController::class, 'show'])      ->name('paroisses.profile');
+    Route::post('paroisses/{uuid}/admin/profile',                [ParoissesProfileController::class, 'update'])    ->name('paroisses.profile.update');
+
+    Route::prefix('paroisses/{uuid}/calendar')->group(function () {
+        Route::get('/', [CalendarController::class, 'index'])->defaults('scope', 'paroisse')->name('paroisses.calendar');
+        Route::get('/events', [CalendarController::class, 'events'])->defaults('scope', 'paroisse')->name('paroisses.calendar.events');
+        Route::post('/events', [CalendarController::class, 'store'])->defaults('scope', 'paroisse')->name('paroisses.calendar.store');
+        Route::patch('/events/{ceremony}', [CalendarController::class, 'update'])->whereNumber('ceremony')->defaults('scope', 'paroisse')->name('paroisses.calendar.update');
+        Route::delete('/events/{ceremony}', [CalendarController::class, 'destroy'])->whereNumber('ceremony')->defaults('scope', 'paroisse')->name('paroisses.calendar.destroy');
+    });
 });
 
-
-/**
- * Route pour les utilisateur connecter.
- * Permet de modifier leurs compte.
- * */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile',                      [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile',                    [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile',                   [ProfileController::class, 'destroy'])->name('profile.destroy');

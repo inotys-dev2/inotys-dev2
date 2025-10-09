@@ -1,24 +1,26 @@
-.sidebar a.active {
-    background-color: var(--memorys-accent);
-    color: var(--memorys-primary);
-}
 
 .sidebar {
-    background-color: #353d57;
-    color: #ccc;
-    width: 250px;
-    min-height: calc(100vh - 120px);
-    padding: 20px 10px;
     display: flex;
     flex-direction: column;
+    position: fixed;
+    top: 86px;
+    left: 0;
+    bottom: 0;
+    width: 250px; /* 👈 largeur flexible entre 100px et 200px */
+    background: var(--memorys-primary);
+    padding: 1rem;
+    border-right: 1px solid var(--memorys-primary);
+    overflow-y: auto;
+    z-index: 10;
 }
 
-.sidebar h4 {
+.sidebar h5 {
     color: #F7B954;
     margin-top: 20px;
     margin-bottom: 5px;
     text-decoration: underline;
     font-family: "Poppins Medium", sans-serif;
+    font-size: 0.8rem; /* 👈 taille adaptée */
 }
 
 .sidebar a {
@@ -28,13 +30,124 @@
     text-decoration: none;
     padding: 6px 10px;
     border-radius: 5px;
+    font-size: 0.9rem; /* 👈 ajuste légèrement la taille du texte */
 }
 
 .sidebar a:hover {
     background-color: #2c3245;
-    color: white
+    color: white;
 }
+
+.sidebar a.active {
+     background-color: var(--memorys-accent);
+     color: var(--memorys-primary);
+ }
 
 .sidebar i { margin-right: 8px; }
 
-.layout { display: flex; }
+
+/**------------------------------------------------------------------------**/
+
+@media (max-width: 1150px) {
+
+    .layout {
+        display: flex;
+    }
+}
+
+:root {
+    --radius: 6px;
+    --transition: .2s ease;
+    --color-surface: #fff;
+    --shadow: 0 12px 48px -10px rgba(31,45,58,.08);
+}
+
+.navbar {
+    display: block;
+    position: fixed;
+    top: 88px;
+    background-color: white;
+    box-shadow: 0 2px rgba(0, 0, 0, 0.2);
+    z-index: 101;
+    width: 100%;
+}
+
+/* Liste horizontale */
+.navbar__list {
+    background-color: var(--memorys-primary);
+    height: 3rem;
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    gap: 40px; /* réduit un peu l’espacement sur mobile */
+    justify-content: center;
+}
+
+/* Élément de menu */
+.navbar__item {
+    position: relative;
+    align-content: center;
+}
+
+.navbar__item a {
+    color: white;
+}
+
+/* Bouton du dropdown */
+.dropdown__toggle {
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    padding: var(--spacing-header) 0;
+    color: white;
+    transition: color var(--transition);
+}
+.dropdown__toggle:hover,
+.dropdown__toggle:focus {
+    color: white;
+}
+
+/* Menu déroulant (caché par défaut) */
+.dropdown__menu {
+    position: absolute;
+    top: 105%;
+    left: 0;
+    background-color: var(--memorys-primary);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    list-style: none;
+    margin: 0;
+    padding: 15px;
+    min-width: 180px;
+    opacity: 0;
+    transform: translateY(10px);
+    visibility: hidden;
+    transition:
+        opacity var(--transition),
+        transform var(--transition),
+        visibility var(--transition);
+    z-index: 100;
+}
+
+/* Affichage du dropdown quand aria-expanded est true */
+.navbar__item[aria-expanded="true"] .dropdown__menu {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+/* Liens à l’intérieur du dropdown */
+.dropdown__item {
+    display: flex;
+    padding: calc(var(--spacing-header) / 2) var(--spacing-header);
+    text-decoration: none;
+    transition: background-color var(--transition);
+    gap: 15px;
+}
+.dropdown__item:hover,
+.dropdown__item:focus {
+    background-color: var(--color-bg);
+}
+

@@ -14,11 +14,11 @@ class MethodFacturationSeeder extends Seeder
 {
     public function run()
     {
-        $paroisses = Paroisses::all();
+        /*$paroisses = Paroisses::all();
         $pompes = Entreprises::all();
 
         foreach ($pompes as $pompe) {
-            for ($i = 0; $i < 20; $i++) {
+            for ($i = 0; $i < 5; $i++) {
                 DB::transaction(function () use ($pompe, $paroisses) {
                     $paroisse = $paroisses->random();
 
@@ -28,9 +28,7 @@ class MethodFacturationSeeder extends Seeder
                         ->for(\App\Models\UtilisateurParoisse::factory(), 'users_paroisses')
                         ->for(\App\Models\User::factory(), 'createur')
                         ->create([
-                            // Si les relations ->for() renseignent déjà les foreign keys,
-                            // tu peux omettre ces overrides. Sinon ajuste le nom de la clé :
-                            'paroisses_id' => $paroisse->id,
+                            'paroisse_id' => $paroisse->id,
                             'entreprise_id' => $pompe->id,
                         ]);
 
@@ -40,7 +38,7 @@ class MethodFacturationSeeder extends Seeder
                     ]);
 
                     $facture = FactureParoisse::factory()->create([
-                        'paroisses_id' => $demande->paroisse_id ?? $demande->paroisses_id,
+                        'paroisse_id' => $demande->paroisse_id ?? $demande->paroisse_id,
                         'entreprise_id' => $pompe->id,
                         'client_nom' => $demande->defunt_nom,
                     ]);
@@ -53,6 +51,6 @@ class MethodFacturationSeeder extends Seeder
                     ]);
                 });
             }
-        }
+        }*/
     }
 }

@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('users_paroisses', function (Blueprint $table) {
             $table->bigIncrements('id')->autoIncrement();
             $table->foreignId('users_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('paroisses_id')->constrained('paroisses')->onDelete('cascade');
-            $table->string('rank', 50)->enum('officiant', 'benevole');
-            $table->unique(['users_id', 'paroisses_id']);
+            $table->foreignId('paroisse_id')->constrained('paroisse')->onDelete('cascade');
+            $table->unique(['users_id', 'paroisse_id']);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate();
         });

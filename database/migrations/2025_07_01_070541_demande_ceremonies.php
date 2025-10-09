@@ -14,21 +14,23 @@ return new class extends Migration
         Schema::create('demande_ceremonies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('entreprise_id')->constrained('entreprise');
-            $table->foreignId('paroisses_id')->constrained('paroisses');
+            $table->foreignId('user_entreprise_id')->constrained('users');;
+            $table->foreignId('paroisse_id')->constrained('paroisse');
             $table->foreignId('users_paroisses_id')->nullable()->constrained('users_paroisses');
-            $table->string('nom_defunt');
-            $table->dateTime('date_ceremonie');
-            $table->time('heure_ceremonie');
-            $table->integer('duree_minutes')->default(60);
-            $table->string('nom_contact_famille')->nullable();
-            $table->string('telephone_contact_famille', 20)->nullable();
-            $table->text('demandes_speciales')->nullable();
-            $table->enum('statut', ['en_attente', 'acceptee', 'refusee', 'passee' ])->default('en_attente');
-            $table->decimal('montant', 8, 2)->nullable();
-            $table->enum('statut_paiement', ['en_attente', 'paye', 'annule'])->default('en_attente');
-            $table->foreignId('cree_par')->constrained('users');;
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrentOnUpdate();
+            $table->foreignId('assigned_at')->nullable()->constrained('users');
+            $table->string('deceased_name');
+            $table->date('ceremony_date');
+            $table->time('ceremony_hour');
+            $table->integer('duration_time')->default(60);
+            $table->string('contact_family_name')->nullable();
+            $table->string('telephone_contact_family', 20)->nullable();
+            $table->text('special_requests')->nullable();
+            $table->enum('statut', ['treatment','waiting', 'accepted', 'canceled', 'passed' ])->default('treatment');
+            $table->text('cancel_reason')->nullable();
+            $table->decimal('sum', 8, 2)->nullable();
+            $table->enum('statut_paiement', ['define','waiting', 'paid', 'canceled'])->default('define');
+            $table->integer("score")->default(0);
+            $table->timestamps();
         });
     }
 

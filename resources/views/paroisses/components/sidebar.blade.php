@@ -12,8 +12,8 @@
             <!-- Section : Gestion des cérémonies -->
             <h2>Gestion des cérémonies</h2>
             <div>
-                <li class="{{ request()->routeIs('paroisses.agenda') ? 'active' : '' }}">
-                    <a href="{{ route('paroisses.agenda', ['uuid' => $paroisse->uuid]) }}">
+                <li class="{{ request()->routeIs('paroisses.calendar') ? 'active' : '' }}">
+                    <a href="{{ route('paroisses.calendar', ['uuid' => $paroisse->uuid]) }}">
                         Mon agenda
                     </a>
                 </li>
@@ -72,7 +72,7 @@
 
         // Fermer si clic en dehors du menu
         document.addEventListener('click', (e) => {
-            const clickedOutside = !mobileMenu.contains(e.target) && e.target !== open;
+            const clickedOutside = !mobileMenu?.contains(e.target) && e.target !== open;
             if (mobileMenu?.classList.contains('open') && clickedOutside) {
                 mobileMenu.classList.remove('open');
             }

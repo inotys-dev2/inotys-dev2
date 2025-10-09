@@ -202,3 +202,13 @@
     box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.3);
 }
 
+#my-select {
+    width: 260px;
+}
+
+@media (max-width: 1150px) {
+    #calendar {
+        margin-top: 50px;
+    }
+}
+

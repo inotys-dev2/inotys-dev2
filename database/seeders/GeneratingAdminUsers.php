@@ -12,7 +12,7 @@ class GeneratingAdminUsers extends Seeder
 {
     public function run(): void
     {
-        $now = Carbon::now();
+        /*$now = Carbon::now();
 
         // Créer une entreprise
         $entreprise = Entreprises::factory()->create();
@@ -65,6 +65,6 @@ class GeneratingAdminUsers extends Seeder
             'last_seen'  => $now,
             'created_at' => $now,
             'updated_at' => $now,
-        ]);
+        ]);*/
     }
 }

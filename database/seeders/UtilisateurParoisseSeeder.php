@@ -16,6 +16,6 @@ class UtilisateurParoisseSeeder extends Seeder
 {
     public function run(): void
     {
-        UtilisateurParoisse::factory()->count(10)->create();
+        //UtilisateurParoisse::factory()->count(10)->create();
     }
 }

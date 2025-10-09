@@ -31,6 +31,12 @@
     color: #222;
 }
 
+.header-box .header-left .logo-ent img {
+    width: 180px;
+    margin-left: 16px;
+    margin-right: 16px;
+}
+
 .header-box .header-center h2 {
     font-size: 3rem;
     margin: 0;
@@ -59,9 +65,8 @@
     align-items: center;
     background-color: #6B7280; /* gris foncé */
     color: #E5E5E5;
-    padding: 6px 10px;
-    width: 190px;
-    height: 50px;
+    padding: 10px 14px;
+    border-radius: 8px;
     cursor: pointer;
     border-bottom: 2px solid white;
 }
@@ -103,7 +108,7 @@
     position: absolute;
     top: 100%;
     left: 0;
-    width: 190px;
+    width: 100%;
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
@@ -112,6 +117,7 @@
     display: flex;
     flex-direction: column;
     box-shadow: none;
+    border-radius: 8px;
 }
 
 .user-menu__dropdown.is-open {
@@ -190,7 +196,6 @@
 .user-menu__dropdown form button:hover svg {
     color: rgba(232, 78, 78, 0.79);
     fill: rgba(232, 78, 78, 0.79);
-
 }
 
 #menu-toggle {
@@ -238,30 +243,25 @@
 
 @media (max-width: 1024px) {
     .user-menu__toggle {
-        background-color: transparent;
-        border-bottom: transparent;
+        position: relative;
     }
     .user-menu__toggle img {
         width: 42px;
         height: 42px;
     }
-    .user-menu__toggle div {
-        display: none;
-    }
-    .user-menu__toggle svg {
+    .user-menu__toggle .toggle-center,
+    .user-menu__toggle .toggle-right {
         display: none;
     }
 
+    .header-right {
+        width: unset;
+        height: unset;
+    }
+
     .user-menu__dropdown {
-        position: fixed;
-        top: 75px;
-        right: 0;
-        width: 300px;
-        height: 150px;
-        background-color: #fff;
-        box-shadow: none;
-        opacity: 1;
-        border: 2px solid gray;
+        left: -100px;
+        width: 170px;
     }
 }
 

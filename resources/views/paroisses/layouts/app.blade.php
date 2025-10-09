@@ -32,20 +32,6 @@
     @endforeach
 
 </head>
-<style>
-    /* Affichage par défaut */
-    .sidebar-app { display: block; }
-    .navbar-app  { display: none;  }
-
-    /* Adaptation responsive : en dessous de 1150px, on cache la sidebar et on affiche la navbar mobile */
-    @media (max-width: 1150px) {
-        .sidebar-app {
-            display: none;
-        }
-        .navbar-app  { display: block;}
-    }
-</style>
-
 <body>
 
 <!-- Inclusion de l'en-tête -->

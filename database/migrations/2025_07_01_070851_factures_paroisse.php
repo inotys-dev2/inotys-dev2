@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('factures_paroisse', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('paroisses_id')->constrained('paroisses')->onDelete('cascade');
+            $table->foreignId('paroisse_id')->constrained('paroisse')->onDelete('cascade');
             $table->foreignId('entreprise_id')->constrained('entreprise')->onDelete('cascade');
             $table->string('client_nom')->nullable();
             $table->text('description')->nullable();

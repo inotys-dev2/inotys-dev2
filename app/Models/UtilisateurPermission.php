@@ -40,6 +40,7 @@ class UtilisateurPermission extends Model
     {
         return $this->belongsTo(Entreprises::class, 'entreprise_id');
     }
+
 }
 
 

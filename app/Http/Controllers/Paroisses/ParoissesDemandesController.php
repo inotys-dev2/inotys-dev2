@@ -16,11 +16,11 @@ class ParoissesDemandesController
         $paroisse = Paroisses::where('uuid', $uuid)->firstOrFail();
 
         $order = ['acceptee', 'en_attente', 'refusee', 'passee'];
-        $demandes = DemandeCeremonie::where('paroisses_id', $paroisse->id)
+        $demandes = DemandeCeremonie::where('paroisse_id', $paroisse->id)
             ->orderByRaw("FIELD(statut, '".implode("','", $order)."')")
             ->get();
 
-        $counts = DemandeCeremonie::where('paroisses_id', $paroisse->id)
+        $counts = DemandeCeremonie::where('paroisse_id', $paroisse->id)
             ->select('entreprise_id', DB::raw('COUNT(*) AS total'))
             ->groupBy('entreprise_id')
             ->pluck('total', 'entreprise_id');

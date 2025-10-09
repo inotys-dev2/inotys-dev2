@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nom', 100);
             $table->string('profileImg')->default('default_avatar.png');
             $table->string('telephone', 20)->nullable();
-            $table->enum('access', ['admin', 'entreprise', 'paroisses']);
+            $table->enum('access', ['admin', 'entreprise', 'paroisse']);
             $table->string('role')->default('employer');
             $table->string('theme')->default('default');
             $table->timestamp('last_seen')->nullable();

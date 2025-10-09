@@ -42,24 +42,7 @@
     @endforeach
 </head>
 <body>
-<style>
-    /* Affichage par défaut */
-    .sidebar-app { display: block; }
-    .navbar-app  { display: none;  }
 
-    /* Adaptation responsive : en dessous de 1150px, on cache la sidebar et on affiche la navbar mobile */
-    @media (max-width: 1150px) {
-        .sidebar-app {
-            display: none;
-        }
-        .navbar-app  { display: block;}
-    }
-</style>
-
-{{--
-    Inclusion du header commun à toutes les pages entreprises.
-    Contient généralement le logo, le nom de l’entreprise, le menu utilisateur, etc.
---}}
 @include('entreprise.components.header')
 
 <!-- Structure principale de la page -->

@@ -1,10 +1,10 @@
 @import './components/footer.css';
 @import './components/header.css';
 @import './components/sidebar.css';
-@import './demande.css';
-@import './membres.css';
-@import './calendar.css';
-@import './demandes.css';
+@import './agenda/demande.css';
+@import './administration/membres.css';
+@import './agenda/calendar.css';
+@import './agenda/demandes.css';
 @import './dashboard.css';
 @import "./components/main-content.css";
 
@@ -13,7 +13,6 @@
     padding: 0;
     box-sizing: border-box;
 }
-
 :root {
     --memorys-input-bg: #F0F2F5;
     --memorys-input-border: #6E7790;
@@ -24,12 +23,18 @@
     --memorys-border: #B3B7BF;
 }
 
-.main-content {
-    flex: 1;
-    background-color: white;
-    margin: 40px;
-}
-
 .bg-memorys {
     background-color: var(--memorys-primary);
+}
+
+/* Adaptation responsive : en dessous de 1150px, on cache la sidebar et on affiche la navbar mobile */
+@media (max-width: 1150px) {
+    .sidebar-app {
+        display: none;
+    }
+    .navbar-app  {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+    }
 }

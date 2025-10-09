@@ -10,6 +10,6 @@ class ParoissesSeeder extends Seeder
 {
     public function run(): void
     {
-        Paroisses::factory()->count(5)->create();
+        //Paroisses::factory()->count(5)->create();
     }
 }

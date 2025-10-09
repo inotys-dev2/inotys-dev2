@@ -15,7 +15,7 @@ class FactureParoisseFactory extends Factory
         $total = $montant + $taxes;
 
         return [
-            'paroisses_id' => \App\Models\Paroisses::factory(),
+            'paroisse_id' => \App\Models\Paroisses::factory(),
             'entreprise_id' => \App\Models\Entreprises::factory(),
             'client_nom' => $this->faker->name,
             'description' => 'Cérémonie religieuse pour ' . $this->faker->name,

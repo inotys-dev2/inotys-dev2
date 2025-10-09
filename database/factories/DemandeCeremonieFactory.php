@@ -10,18 +10,28 @@ class DemandeCeremonieFactory extends Factory
 
     public function definition()
     {
+        $status = $this->faker->randomElement(['a_traiter', 'passee']);
+        $score = 0;
+        $montant = $this->faker->randomFloat(2, 100, 1000);
+
+        if($status == 'a_traiter') {
+            $score = $this->faker->numberBetween(0, 5);
+        } else if($status == 'passee'){
+            $montant = 0;
+        }
+
         return [
             'nom_defunt' => $this->faker->name,
-            'date_ceremonie' => $this->faker->dateTimeBetween('+1 days', '+10 days'),
-            'heure_ceremonie' => $this->faker->time('H:i:s'),
+            'date_ceremonie' => $this->faker->dateTimeBetween('+1 days', '+10 days')->format('Y-m-d'),
+            'heure_ceremonie' => $this->faker->time(),
             'duree_minutes' => $this->faker->numberBetween(30, 180),
-            'nom_contact_famille' => $this->faker->optional()->name(),
-            'telephone_contact_famille' => $this->faker->optional()->phoneNumber(),
+            'nom_contact_famille' => $this->faker->name(),
+            'telephone_contact_famille' => $this->faker->phoneNumber(),
             'demandes_speciales' => $this->faker->optional()->sentence(),
-            'statut' => $this->faker->randomElement(['en_attente', 'acceptee', 'refusee', 'passee']),
-            'montant' => $this->faker->optional()->randomFloat(2, 100, 1000),
-            'statut_paiement' => $this->faker->randomElement(['en_attente', 'paye', 'annule']),
+            'score' => $score,
+            'statut' => $status,
+            'montant' => $montant,
+            'statut_paiement' => $this->faker->randomElement(['en_attente']),
         ];
     }
-
 }

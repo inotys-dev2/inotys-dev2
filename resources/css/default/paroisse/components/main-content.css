@@ -1,0 +1,38 @@
+.main-content {
+    margin-top: 88px;
+    margin-left: 198px;
+    padding: 1.8rem 0.4rem;
+    min-height: calc(100vh - 110px);
+    background: var(--color-bg);
+}
+
+.sidebar {
+    visibility: visible;
+}
+
+.navbar {
+    position: absolute;
+    visibility: hidden;
+}
+
+@media (max-width: 1191px) {
+    .main-content {
+        margin-top: 0;
+        margin-left: 0;
+    }
+
+    .sidebar {
+        position: absolute;
+        visibility: hidden;
+    }
+
+    .navbar {
+        position: unset;
+        visibility: visible;
+    }
+
+    .layout {
+        flex: 1;
+    }
+}
+

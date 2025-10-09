@@ -15,7 +15,6 @@ return new class extends Migration
             $table->bigIncrements('id')->autoIncrement();
             $table->foreignId('users_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('entreprise_id')->constrained('entreprise')->onDelete('cascade');
-            $table->string('rank', 50)->default('employer');
             $table->unique(['users_id', 'entreprise_id']);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate();

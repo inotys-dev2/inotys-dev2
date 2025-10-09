@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -69,7 +70,6 @@ class User extends Authenticatable
             'entreprise_id'    // colonne dans users_entreprises qui pointe sur entreprise.id
         )
             ->using(UtilisateurEntreprise::class)
-            ->withPivot('rank')
             ->withTimestamps();
     }
 
@@ -79,10 +79,9 @@ class User extends Authenticatable
             Paroisses::class,
             'users_paroisses',
             'users_id',        // colonne dans users_entreprises qui pointe sur users.id
-            'paroisses_id'    // colonne dans users_entreprises qui pointe sur entreprise.id
+            'paroisse_id'    // colonne dans users_entreprises qui pointe sur entreprise.id
         )
             ->using(UtilisateurParoisse::class)
-            ->withPivot('rank')
             ->withTimestamps();
     }
 
@@ -133,9 +132,9 @@ class User extends Authenticatable
      * 3) Attribue un jeu de permissions à l’utilisateur.
      *
      * @param  array  $permissions  Tableau associatif ['permission_xxx' => true|false, …]
-     * @return UtilisateurPermission
+     * @return Model
      */
-    public function setPermissions(array $permissions): UtilisateurPermission
+    public function setPermissions(array $permissions): Model
     {
         // Récupère ou crée le modèle
         $perms = $this->perms()->firstOrNew();

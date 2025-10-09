@@ -17,8 +17,7 @@ class UtilisateurParoisseFactory extends Factory
     {
         return [
             'users_id'      => User::factory(),
-            'paroisses_id'  => Paroisses::factory(),
-            'rank'          => $this->faker->randomElement(['Directeur', 'Responsable', 'Employer', 'Stagiaire', 'Interim']),
+            'paroisse_id'  => Paroisses::factory(),
         ];
     }
 }

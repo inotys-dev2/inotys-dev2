@@ -18,14 +18,14 @@ class UtilisateurParoisse extends Pivot
     public $incrementing = false;
 
     protected $fillable = [
-        'paroisses_id',
+        'paroisse_id',
         'users_id',
         'access',      // votre champ de pivot
     ];
 
-    public function entreprise()
+    public function paroisse()
     {
-        return $this->belongsTo(Paroisses::class, 'paroisses_id');
+        return $this->belongsTo(Paroisses::class, 'paroisse_id');
     }
 
     public function user()

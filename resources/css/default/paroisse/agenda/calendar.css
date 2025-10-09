@@ -1,0 +1,425 @@
+.calendar-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 66px;
+    padding-bottom: 60px;
+}
+
+.calendar-nav {
+    position: fixed;
+    top: 110px;
+    left: 206px;
+    right: 8px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: white;
+    border: 1px #B8B8B8 solid;
+    border-radius: 4px;
+    z-index: 1000;
+}
+
+.btn:first-child {
+    margin-left: 8px;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    color: var(--color-link);
+    margin: 5px;
+    font-size: 14px;
+    border: 1px #B8B8B8 solid;
+    border-radius: 4px;
+    padding: 5px 10px;
+    height: 32px;
+}
+
+.btn svg {
+    margin: 5px;
+    height: 15px;
+    width: 15px;
+    color: var(--color-link);
+    fill: currentColor;
+}
+
+.btn.inverse svg {
+    color: white;
+}
+
+.btn.inverse {
+    background-color: var(--color-link);
+    color: white;
+}
+
+.btn.selected {
+    border: 2px var(--color-link) solid;
+}
+
+#now {
+    border-color: var(--color-link);
+}
+
+#now:disabled {
+    color: gray;
+    border-color: gray;
+}
+
+#now:disabled svg {
+    fill: gray;
+}
+
+.separator {
+    content: '';
+    display: block;
+    border: 1px #B8B8B8 solid;
+    height: 32px;
+    margin: 7px;
+}
+
+.calendar-select {
+    font-size: 12px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    padding: 4px 30px 4px 12px;
+    color: var(--color-link);
+}
+
+.tags-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-btn {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 3px 6px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    height: 32px;
+}
+
+.tag-btn.active.green {
+    background-color: green;
+    color: white;
+    border-color: green;
+}
+
+.tag-btn.active.orange {
+    background-color: orange;
+    color: white;
+    border-color: orange;
+}
+
+.tag-btn.active.gray {
+    background-color: gray;
+    color: white;
+    border-color: gray;
+}
+
+.tag-btn.active.red {
+    background-color: red;
+    color: white;
+    border-color: red;
+}
+
+.tag-btn.active .tag-icon {
+    background-color: white;
+}
+
+.tag-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.tag-icon.orange { background-color: orange; }
+.tag-icon.green { background-color: green;}
+.tag-icon.rouge { background-color: red; }
+.tag-icon.gris { background-color: gray; }
+
+.tag-btn:last-child {
+    margin-right: 8px;
+}
+
+:root{
+    --hour-col-w: 25px;       /* largeur de la colonne heures */
+    --row-h: 40px;            /* hauteur d’une ligne (1h dans ton rendu actuel) */
+    --grid-b: #eee;           /* bordures fines */
+    --grid-b-strong: #ddd;    /* bordures marquées */
+    --today-bg: rgba(25,118,210,.06);
+}
+
+.calendar-header {
+    position: fixed;
+    left: 206px;
+    right: 8px;
+    top: 164px;
+    border-radius: 4px 4px 0 0;
+    border: #B8B8B8 1px solid;
+    display: flex;
+    gap: 8px;
+    background-color: white;
+    font-size: 14px;
+    padding: 4px;
+    align-items: center;
+    z-index: 1000;
+    height: 50px;
+}
+
+#prev, #next {
+    display: flex;
+    border-radius: 2px;
+    border: 1px transparent solid;
+    padding: 10px;
+    height: 32px;
+    align-items: center;
+    transition: all 0.4s ease;
+}
+
+#next:hover, #prev:hover {
+    background-color: rgba(184, 184, 184, 0.2);
+    border: 1px var(--color-link) solid;
+    color: var(--color-link);
+}
+
+/* ====== Zone calendrier (déjà ancrée chez toi) ====== */
+#calendar-content {
+    position: fixed;
+    left: 206px;
+    right: 8px;
+    top: 214px;
+    bottom: 8px;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid #B8B8B8;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    --hour-col-w: 72px;
+}
+
+/* ====== Table commune aux vues jour/semaine/mois ====== */
+#calendar-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+}
+
+/* En-têtes (jours en semaine/mois, cellule vide en jour) */
+#calendar-content thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #fafafa;
+    border-bottom: 1px solid var(--grid-b-strong);
+    padding: 8px;
+    text-align: center;
+    height: 40px;
+    white-space: nowrap;
+}
+
+/* Première colonne (heures) — sticky à gauche pour jour/semaine */
+#calendar-content .hour-col {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: var(--hour-col-w);
+    min-width: var(--hour-col-w);
+    max-width: var(--hour-col-w);
+    text-align: right;
+    padding: 0 8px 0 6px;
+    color: #666;
+    background: #fcfcfc;
+    border-right: 1px solid #f3f3f3;
+}
+
+/* Lignes d'heures pour jour/semaine */
+#calendar-content tbody .hour-row {
+    height: var(--row-h);
+}
+
+/* Cellules communes */
+#calendar-content td,
+#calendar-content th {
+    border-right: 1px solid var(--grid-b);
+}
+#calendar-content td:last-child,
+#calendar-content th:last-child {
+    border-right: 0;
+}
+
+/* Quadrillage jour/semaine : ligne fine à chaque ligne + plus marqué chaque heure */
+#calendar-content tbody .hour-row td {
+    border-bottom: 1px dashed var(--grid-b);
+    vertical-align: top;
+    padding: 4px 6px;
+}
+#calendar-content tbody .hour-row + .hour-row td {
+    border-bottom-style: solid; /* accent si tu dupliques des demi-heures plus tard */
+}
+
+/* Surlignage de l’heure actuelle (jour et semaine) */
+#calendar-content .current-hour {
+    background:
+        linear-gradient(to right, transparent, transparent),
+        repeating-linear-gradient(
+            to right, rgba(25,118,210,.12), rgba(25,118,210,.12) 4px,
+            transparent 4px, transparent 8px
+        );
+}
+
+/* Hover doux sur les cellules */
+#calendar-content td:hover { background: rgba(0,0,0,.025); }
+
+#calendar-content thead tr.semaine_name th {
+    font-weight: 600;
+}
+#calendar-content thead tr.semaine_name th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+}
+
+
+/* ====== Vue JOUR ====== */
+/* le thead ne contient qu’un th vide — on garde la bordure et la hauteur */
+#calendar-content tbody tr.hour-row td:first-child {
+    background: #fcfcfc;
+}
+
+/* ====== Vue MOIS ====== */
+#calendar-content .month table,
+#calendar-content .month thead th,
+#calendar-content .month tbody td { /* si tu ajoutes une classe .month au wrapper */
+    table-layout: fixed;
+}
+
+#calendar-content tbody tr td {
+    /* en mois, tes TD contiennent un <div> avec le numéro et un <ul> */
+    vertical-align: top;
+}
+
+/* Grille mois : carrés réguliers */
+#calendar-content thead + tbody tr td {
+    height: 110px;               /* adapte selon ton besoin */
+    border-bottom: 1px solid var(--grid-b);
+}
+#calendar-content thead + tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* Numéro du jour en mois (c’est le <div> premier enfant que ton JS insère) */
+#calendar-content tbody td > div:first-child {
+    font-weight: 600;
+    font-size: 12px;
+    color: #444;
+    padding: 6px 6px 4px;
+}
+
+/* Liste d'événements en mois */
+#calendar-content tbody td > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0 6px 6px;
+    display: grid;
+    gap: 4px;
+}
+#calendar-content tbody td > ul li {
+    font-size: 12px;
+    line-height: 1.2;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: #f6f7f8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Jour d’aujourd’hui (toutes vues) */
+.today-cell,
+td.today-cell {
+    background: var(--today-bg);
+}
+
+
+.week-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.week-table th, .week-table td {
+    border: 1px solid #e5e7eb; /* gris clair */
+    vertical-align: top;
+}
+
+.corner { width: 64px; }
+
+.hour-col {
+    width: 64px;
+    font-variant-numeric: tabular-nums;
+    background: #fafafa;
+    position: sticky;
+    left: 0;
+}
+
+.day-header {
+    text-align: center;
+    background: #f8fafc;
+    padding: 8px 0;
+}
+
+.day-header-inner {
+    display: inline-flex;
+    gap: 6px;
+    align-items: baseline;
+}
+
+.weekday { font-weight: 600; }
+.daynum {
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: #eef2ff; /* pastille douce */
+}
+
+.day-header.is-today .daynum {
+    background: #2563eb !important;
+    color: white;
+}
+
+.slot { height: 48px; } /* hauteur d’une heure */
+
+.current-day {
+    background: rgba(37, 99, 235, 0.06); /* léger bleu pour toute la colonne du jour actuel */
+}
+
+.current-hour {
+    outline: 2px solid #2563eb; /* encadrement de l’heure courante */
+    outline-offset: -2px;
+    background: rgba(37, 99, 235, 0.09);
+}
+
+.hour-row:nth-child(2n) .slot:not(.current-hour) {
+    background: #fcfcfc; /* zébrage discret */
+}
+
+.slot ul {
+    list-style: none;
+    margin: 4px;
+    padding: 0;
+    font-size: 12px;
+}

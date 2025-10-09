@@ -17,12 +17,59 @@ class UserFactory extends Factory
             'nom' => $this->faker->lastName,
             'email' => $this->faker->unique()->safeEmail,
             'password' => bcrypt('secret123'),
-            'access' => $this->faker->randomElement(['entreprise', 'paroisses']),
-            'role' => 'Membre',
             'telephone' => $this->faker->phoneNumber,
-            'theme' => $this->faker->randomElement(['default', 'memorys']),
             'created_at' => now(),
             'updated_at' => now(),
         ];
     }
+
+    public function EmployerEntreprise() {
+        return $this->state([
+            'access' => 'entreprise',
+            'role' => $this->faker->randomElement(['Conseiller funéraire', 'Thanatopracteur', 'Porteur/Chauffeur/Fossoyer', 'Assistant administratif', 'Conseiller en prévoyance funéraire', 'Psychologue']),
+            'theme' => 'memorys'
+        ]);
+    }
+
+    public function ResponsableEntreprise() {
+        return $this->state([
+            'access' => 'entreprise',
+            'role' => $this->faker->randomElement(['Conseiller funéraire principal','Maître de cérémonie', 'Responsable administratif']),
+            'theme' => 'memorys'
+        ]);
+    }
+
+    public function DirectionEntreprise() {
+        return $this->state([
+            'access' => 'entreprise',
+            'role' => $this->faker->randomElement(['Directeur funéraire', 'Responsable logistique', 'Responsable commercial']),
+            'theme' => 'memorys'
+        ]);
+    }
+
+
+    public function EmployerParoisse() {
+        return $this->state([
+           'access' => 'paroisse',
+           'role' => $this->faker->randomElement(['Vicaire', 'Diacre', 'Animateur patoral', 'Catéchiste']),
+           'theme' => 'default',
+        ]);
+    }
+
+    public function ResponsableParoisse() {
+        return $this->state([
+            'access' => 'paroisse',
+            'role' => $this->faker->randomElement(['Secrétaire paroissial', 'Trésoirier', 'Resp Communication', 'Resp Logistique']),
+            'theme' => 'default',
+        ]);
+    }
+
+    public function DirecteurParoisse() {
+        return $this->state([
+            'access' => 'paroisse',
+            'role' => $this->faker->randomElement(['Prêtre', 'Curé']),
+            'theme' => 'default',
+        ]);
+    }
+
 }

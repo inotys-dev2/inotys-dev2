@@ -16,7 +16,7 @@
             </button>
             <ul class="dropdown__menu">
                 <li>
-                    <a href="{{ route('paroisses.agenda', ['uuid' => $paroisse->uuid]) }}" class="dropdown__item">
+                    <a href="{{ route('paroisses.calendar', ['uuid' => $paroisse->uuid]) }}" class="dropdown__item">
                         Mon agenda
                     </a>
                 </li>

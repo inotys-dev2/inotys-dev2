@@ -38,7 +38,7 @@
             {{-- Logo de l’entreprise ou du site --}}
             <div class="logo-ent">
                 <a href="{{ route('entreprise.dashboard', ['uuid' => $entreprise->uuid]) }}">
-                    <img src="{{ asset('/images/memorys_logo.png') }}" alt="Logo Memorys" width="150px" height="60" >
+                    <img src="{{ asset('/images/memorys_logo.png') }}" alt="Logo Memorys">
                 </a>
             </div>
         </div>

@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AvailabilitySlot extends Model
 {
-    public $timestamps = true;
 
+    use HasFactory;
+
+    public $timestamps = true;
     protected $table = "availability_slots";
 
     protected $fillable = [
-        'paroisses_id',
+        'paroisse_id',
         'day_of_week',
         'start_time',
         'end_time',];
@@ -25,6 +28,6 @@ class AvailabilitySlot extends Model
     // Relation vers la paroisse
     public function paroisse()
     {
-        return $this->belongsTo(Paroisses::class, 'paroisses_id');
+        return $this->belongsTo(Paroisses::class, 'paroisse_id');
     }
 }

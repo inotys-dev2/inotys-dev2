@@ -1,112 +1,100 @@
-{{--
-    On étend le layout principal du tableau de bord entreprise
-    pour hériter du header, sidebar et footer.
---}}
 @extends('entreprise.layouts.app')
 
-{{-- Section principale du contenu de la page --}}
 @section('content')
     <div class="container">
 
-        {{-- Titre de la page : affichage conditionnel selon si on modifie ou crée une demande --}}
+        {{-- Titre --}}
         <h1 class="page-title">
-            {{ $demande ? 'Modifier la demande' : 'Nouvelle demande de cérémonie' }}
+            {{ isset($ceremony) ? 'Modifier la demande de cérémonie' : 'Nouvelle demande de cérémonie' }}
         </h1>
 
-        {{-- Message de succès après envoi ou mise à jour du formulaire --}}
+        {{-- Message de succès --}}
         @if(session('success'))
             <p class="alert alert-success">{{ session('success') }}</p>
         @endif
 
-        {{--
-            Formulaire d’envoi de la demande de cérémonie
-            - Méthode POST
-            - Action : route entreprise.agenda.envoyer avec l’UUID de l’entreprise
-            - Si on modifie une demande, on ajoute son ID dans l’URL (?id=)
-        --}}
+        {{-- Formulaire --}}
         <form
             method="POST"
-            action="{{ route('entreprise.agenda.envoyer', $entreprise->uuid) }}?id={{ $demande->id ?? '' }}"
+            action="{{ route('entreprise.agenda.envoyer', $entreprise->uuid) }}{{ isset($ceremony) ? '?id='.$ceremony->id : '' }}"
             class="form form-demande"
         >
-            {{-- Protection CSRF --}}
             @csrf
 
-            {{-- ===================== CHAMP PAROISSE ===================== --}}
+            {{-- ===================== PAROISSE ===================== --}}
             <div class="form-group">
-                <label for="paroisses_id" class="form-label">Paroisse <span style="color: red">*</span></label>
-
+                <label for="paroisse_id" class="form-label">Paroisse <span class="text-danger">*</span></label>
                 <select
-                    name="paroisses_id"
-                    id="paroisses_id"
+                    name="paroisse_id"
+                    id="paroisse_id"
                     class="form-select"
                     required
-                    title="Veuillez choisir une paroisse"
+                    title="Veuillez sélectionner une paroisse"
                 >
-                    <option value="">Veuillez choisir la paroisse...</option>
-                    @foreach($paroisses as $p)
+                    <option value="">Sélectionnez une paroisse...</option>
+                    @foreach($parishes as $parish)
                         <option
-                            value="{{ $p->id }}"
-                            {{ old('paroisses_id', optional($demande)->paroisses_id) == $p->id ? 'selected' : '' }}
+                            value="{{ $parish->id }}"
+                            {{ old('paroisse_id', optional($ceremony)->paroisse_id) == $parish->id ? 'selected' : '' }}
                         >
-                            {{ $p->name }}
+                            {{ $parish->name }}
                         </option>
                     @endforeach
                 </select>
-
-                @error('paroisses_id')
+                @error('paroisse_id')
                 <p class="form-error">{{ $message }}</p>
                 @enderror
             </div>
 
-
-            {{-- ===================== CHAMP NOM DU DÉFUNT ===================== --}}
+            {{-- ===================== NOM DU DÉFUNT ===================== --}}
             <div class="form-group">
-                <label for="nom_defunt" class="form-label">Nom du défunt <span style="color: red">*</span></label>
+                <label for="deceased_name" class="form-label">Nom du défunt <span class="text-danger">*</span></label>
                 <input
                     type="text"
-                    name="nom_defunt"
-                    id="nom_defunt"
+                    name="deceased_name"
+                    id="deceased_name"
                     class="form-input"
-                    placeholder="Alex Dupont"
-                    value="{{ old('nom_defunt', optional($demande)->nom_defunt) }}"
+                    placeholder="Ex : Jean Dupont"
+                    value="{{ old('deceased_name', optional($ceremony)->deceased_name) }}"
                     required
-                    pattern="^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,60}$"
-                    title="Entrez 2 à 60 caractères : lettres, espaces, apostrophes ou tirets (ex : Jean-Pierre, O’Connor)"
+                    pattern="^[A-Za-zÀ-ÖØ-öø-ÿ' \-]{2,60}$"
+                    title="Entrez entre 2 et 60 caractères : lettres, espaces, apostrophes ou tirets (ex : Jean-Pierre, O’Connor)"
                 >
-                @error('nom_defunt')
+                @error('deceased_name')
                 <p class="form-error">{{ $message }}</p>
                 @enderror
             </div>
 
-            {{-- ===================== DATE ET HEURE ===================== --}}
+            {{-- ===================== DATE & HEURE ===================== --}}
             <div class="form-row">
-                {{-- Date de la cérémonie --}}
                 <div class="form-group form-group-half">
-                    <label for="date_ceremonie" class="form-label">Date</label>
+                    <label for="ceremony_date" class="form-label">Date de la cérémonie <span class="text-danger">*</span></label>
                     <input
                         type="date"
-                        name="date_ceremonie"
-                        id="date_ceremonie"
+                        name="ceremony_date"
+                        id="ceremony_date"
                         class="form-input"
-                        value="{{ old('date_ceremonie', $defaultDate) }}"
+                        required
+                        value="{{ old('ceremony_date', $defaultDate) }}"
+                        title="Sélectionnez la date de la cérémonie"
                     >
-                    @error('date_ceremonie')
+                    @error('ceremony_date')
                     <p class="form-error">{{ $message }}</p>
                     @enderror
                 </div>
 
-                {{-- Heure de la cérémonie --}}
                 <div class="form-group form-group-half">
-                    <label for="heure_ceremonie" class="form-label">Heure</label>
+                    <label for="ceremony_hour" class="form-label">Heure de la cérémonie <span class="text-danger">*</span></label>
                     <input
                         type="time"
-                        name="heure_ceremonie"
-                        id="heure_ceremonie"
+                        name="ceremony_hour"
+                        id="ceremony_hour"
                         class="form-input"
-                        value="{{ old('heure_ceremonie', $defaultTime) }}"
+                        required
+                        value="{{ old('ceremony_hour', $defaultTime) }}"
+                        title="Sélectionnez l'heure de la cérémonie"
                     >
-                    @error('heure_ceremonie')
+                    @error('ceremony_hour')
                     <p class="form-error">{{ $message }}</p>
                     @enderror
                 </div>
@@ -114,73 +102,74 @@
 
             {{-- ===================== DURÉE ===================== --}}
             <div class="form-group">
-                <label for="duree_minutes" class="form-label">Durée (minutes)</label>
+                <label for="duration_time" class="form-label">Durée (en minutes)</label>
                 <input
                     type="number"
-                    name="duree_minutes"
-                    id="duree_minutes"
+                    name="duration_time"
+                    id="duration_time"
                     class="form-input"
-                    placeholder="60 = 1h"
-                    value="{{ old('duree_minutes', $defaultDuration) }}"
+                    placeholder="Ex : 60 = 1h"
+                    value="{{ old('duration_time', $defaultDuration) }}"
+                    min="15"
+                    title="Entrez la durée estimée de la cérémonie en minutes"
                 >
-                @error('duree_minutes')
+                @error('duration_time')
                 <p class="form-error">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- ===================== CONTACT FAMILLE ===================== --}}
             <div class="form-group">
-                <label for="nom_contact_famille" class="form-label">Nom du contact (famille)</label>
+                <label for="contact_family_name" class="form-label">Nom du contact famille</label>
                 <input
                     type="text"
-                    name="nom_contact_famille"
-                    id="nom_contact_famille"
+                    name="contact_family_name"
+                    id="contact_family_name"
                     class="form-input"
-                    placeholder="Pierre Dupont"
-                    value="{{ old('nom_contact_famille', optional($demande)->nom_contact_famille) }}"
-                    {{-- autorise lettres (avec accents), espaces, apostrophes et tirets, 2 à 60 caractères --}}
-                    pattern="^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,60}$"
-                    title="Entrez 2 à 60 caractères : lettres, espaces, apostrophes ou tirets (ex : Jean-Pierre, O’Connor)"
+                    placeholder="Ex : Pierre Dupont"
+                    value="{{ old('contact_family_name', optional($ceremony)->contact_family_name) }}"
+                    pattern="^[A-Za-zÀ-ÖØ-öø-ÿ' \-]{2,60}$"
+                    title="Entrez entre 2 et 60 caractères : lettres, espaces, apostrophes ou tirets"
                 >
-                @error('nom_contact_famille')
+                @error('contact_family_name')
                 <p class="form-error">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="telephone_contact_famille" class="form-label">Téléphone du contact (famille)</label>
+                <label for="telephone_contact_family" class="form-label">Téléphone du contact</label>
                 <input
                     type="tel"
-                    name="telephone_contact_famille"
-                    id="telephone_contact_famille"
+                    name="telephone_contact_family"
+                    id="telephone_contact_family"
                     class="form-input"
                     placeholder="+33 6 12 34 56 78"
-                    value="{{ old('telephone_contact_famille', optional($demande)->telephone_contact_famille) }}"
-                    {{-- international : + optionnel, chiffres/espaces/tirets, 6 à 20 caractères --}}
+                    value="{{ old('telephone_contact_family', optional($ceremony)->telephone_contact_family) }}"
                     pattern="^\+?[0-9\s\-]{6,20}$"
-                    title="Entrez un numéro valide, ex : +33 6 12 34 56 78"
-                />
-                @error('telephone_contact_famille')
+                    title="Entrez un numéro valide (ex : +33 6 12 34 56 78)"
+                >
+                @error('telephone_contact_family')
                 <p class="form-error">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- ===================== DEMANDES SPÉCIALES ===================== --}}
             <div class="form-group">
-                <label for="demandes_speciales" class="form-label">Demandes spéciales</label>
+                <label for="special_requests" class="form-label">Demandes spéciales</label>
                 <textarea
-                    name="demandes_speciales"
-                    id="demandes_speciales"
+                    name="special_requests"
+                    id="special_requests"
                     class="form-textarea"
-                >{{ old('demandes_speciales', optional($demande)->demandes_speciales) }}</textarea>
-                @error('demandes_speciales')
+                    placeholder="Souhaits particuliers pour la cérémonie..."
+                >{{ old('special_requests', optional($ceremony)->special_requests) }}</textarea>
+                @error('special_requests')
                 <p class="form-error">{{ $message }}</p>
                 @enderror
             </div>
 
-            {{-- ===================== BOUTON DE VALIDATION ===================== --}}
-            <button type="submit" class="btn btn-submit">
-                {{ $demande ? 'Mettre à jour' : 'Envoyer la demande' }}
+            {{-- ===================== BOUTON ===================== --}}
+            <button type="submit" class="btn btn-primary">
+                {{ isset($ceremony) ? 'Mettre à jour la demande' : 'Envoyer la demande' }}
             </button>
         </form>
     </div>

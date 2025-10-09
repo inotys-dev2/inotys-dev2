@@ -12,7 +12,7 @@ class ParoissesController extends Controller
         $paroisse = Paroisses::where('uuid', $uuid)->firstOrFail();
         $user = auth()->user();
 
-        if (!auth()->user()->users_paroisses()->where('paroisses_id', $paroisse->id)->exists()) {
+        if (!auth()->user()->users_paroisses()->where('paroisse_id', $paroisse->id)->exists()) {
             abort(403, 'Accès refusé');
         }
 
