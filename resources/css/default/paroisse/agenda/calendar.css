@@ -1,3 +1,8 @@
+body {
+    overflow: hidden;
+    -ms-overflow-style: none; /* cache la barre */
+}
+
 .calendar-container {
     min-height: 100vh;
     display: flex;
@@ -8,7 +13,7 @@
 
 .calendar-nav {
     position: fixed;
-    top: 110px;
+    top: 96px;
     left: 206px;
     right: 8px;
     height: 50px;
@@ -156,7 +161,7 @@
 
 :root{
     --hour-col-w: 25px;       /* largeur de la colonne heures */
-    --row-h: 40px;            /* hauteur d’une ligne (1h dans ton rendu actuel) */
+    --row-h: 20px;            /* hauteur d’une ligne (1h dans ton rendu actuel) */
     --grid-b: #eee;           /* bordures fines */
     --grid-b-strong: #ddd;    /* bordures marquées */
     --today-bg: rgba(25,118,210,.06);
@@ -166,7 +171,7 @@
     position: fixed;
     left: 206px;
     right: 8px;
-    top: 164px;
+    top: 150px;
     border-radius: 4px 4px 0 0;
     border: #B8B8B8 1px solid;
     display: flex;
@@ -200,7 +205,7 @@
     position: fixed;
     left: 206px;
     right: 8px;
-    top: 214px;
+    top: 200px;
     bottom: 8px;
     overflow: auto;
     background: #fff;
@@ -208,6 +213,10 @@
     border-top: none;
     border-radius: 0 0 4px 4px;
     --hour-col-w: 72px;
+}
+
+#calendar-content::-webkit-scrollbar {
+   display: none;
 }
 
 /* ====== Table commune aux vues jour/semaine/mois ====== */
@@ -223,11 +232,11 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    background: #fafafa;
+    background: white;
     border-bottom: 1px solid var(--grid-b-strong);
     padding: 8px;
     text-align: center;
-    height: 40px;
+    height: var(--row-h);
     white-space: nowrap;
 }
 
@@ -271,16 +280,6 @@
     border-bottom-style: solid; /* accent si tu dupliques des demi-heures plus tard */
 }
 
-/* Surlignage de l’heure actuelle (jour et semaine) */
-#calendar-content .current-hour {
-    background:
-        linear-gradient(to right, transparent, transparent),
-        repeating-linear-gradient(
-            to right, rgba(25,118,210,.12), rgba(25,118,210,.12) 4px,
-            transparent 4px, transparent 8px
-        );
-}
-
 /* Hover doux sur les cellules */
 #calendar-content td:hover { background: rgba(0,0,0,.025); }
 
@@ -314,7 +313,7 @@
 
 /* Grille mois : carrés réguliers */
 #calendar-content thead + tbody tr td {
-    height: 110px;               /* adapte selon ton besoin */
+    height: 60px;               /* adapte selon ton besoin */
     border-bottom: 1px solid var(--grid-b);
 }
 #calendar-content thead + tbody tr:last-child td {
@@ -342,7 +341,6 @@
     line-height: 1.2;
     padding: 2px 4px;
     border-radius: 4px;
-    background: #f6f7f8;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -353,7 +351,6 @@
 td.today-cell {
     background: var(--today-bg);
 }
-
 
 .week-table {
     width: 100%;
@@ -382,6 +379,7 @@ td.today-cell {
     padding: 8px 0;
 }
 
+
 .day-header-inner {
     display: inline-flex;
     gap: 6px;
@@ -390,6 +388,8 @@ td.today-cell {
 
 .weekday { font-weight: 600; }
 .daynum {
+    position: relative;
+    z-index: 100;
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 999px;
@@ -403,18 +403,8 @@ td.today-cell {
 
 .slot { height: 48px; } /* hauteur d’une heure */
 
-.current-day {
-    background: rgba(37, 99, 235, 0.06); /* léger bleu pour toute la colonne du jour actuel */
-}
-
 .current-hour {
-    outline: 2px solid #2563eb; /* encadrement de l’heure courante */
     outline-offset: -2px;
-    background: rgba(37, 99, 235, 0.09);
-}
-
-.hour-row:nth-child(2n) .slot:not(.current-hour) {
-    background: #fcfcfc; /* zébrage discret */
 }
 
 .slot ul {
@@ -422,4 +412,99 @@ td.today-cell {
     margin: 4px;
     padding: 0;
     font-size: 12px;
+}
+
+.current-time-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-link);
+    pointer-events: none;
+}
+
+/* ————————————————————————————————
+   📅  Styles pour jours / heures non travaillés
+   ———————————————————————————————— */
+
+
+.hour-passed,
+.day-passed,
+.hour-closed {
+    opacity: 1;
+    pointer-events: none;
+    background-color: #fafafa;
+    background-image: linear-gradient(135deg, #f3f3f3 25%, transparent 25%),
+    linear-gradient(225deg, #f3f3f3 25%, transparent 15%),
+    linear-gradient(45deg, #f3f3f3 25%, transparent 15%),
+    linear-gradient(315deg, #f3f3f3 25%, #fafafa 25%);
+    background-size: 10px 10px;
+    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+}
+
+.hour-closed:not(.day-passed),
+.day-closed {
+    position: relative;
+    opacity: 0.55;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        45deg,
+        #f2f2f2,
+        #f2f2f2 8px,
+        #e6e6e6 8px,
+        #e6e6e6 16px
+    );
+}
+
+.current-day.hour-closed,
+.day-closed.day-passed {
+    opacity: 1;
+    pointer-events: none;
+    background-color: #fafafa;
+    background-image: linear-gradient(135deg, #f3f3f3 25%, transparent 25%),
+    linear-gradient(225deg, #f3f3f3 25%, transparent 15%),
+    linear-gradient(45deg, #f3f3f3 25%, transparent 15%),
+    linear-gradient(315deg, #f3f3f3 25%, #fafafa 25%) !important;
+    background-size: 10px 10px;
+    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+}
+
+.week-table.thead th, .day-header.day-passed, .day-header.day-closed, .day-header {
+    background: white !important;
+    opacity: 1 !important;
+}
+
+/* Optionnel : pour la cellule “entête jour” en semaine */
+.week-table th.day-passed .daynum {
+    text-decoration: line-through;
+}
+
+/* Créneaux normaux : hover clair */
+.slot:hover {
+    background-color: #f0f7ff;
+    cursor: pointer;
+}
+
+/* Événement sélectionné (si tu en as) */
+.slot.selected {
+    background-color: #cce5ff;
+    border: 1px solid #99caff;
+}
+
+/* Événements confirmés / annulés (si tu affiches des statuts) */
+.event.status-confirmee {
+    background: #d4edda;
+    color: #155724;
+}
+.event.status-a_traiter {
+    background: #fff3cd;
+    color: #856404;
+}
+.event.status-annulee {
+    background: #f8d7da;
+    color: #721c24;
+}
+.event.status-passee {
+    background: #e2e3e5;
+    color: #383d41;
 }

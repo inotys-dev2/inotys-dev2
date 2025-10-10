@@ -14,7 +14,7 @@ class MethodFacturationSeeder extends Seeder
 {
     public function run()
     {
-        /*$paroisses = Paroisses::all();
+        $paroisses = Paroisses::all();
         $pompes = Entreprises::all();
 
         foreach ($pompes as $pompe) {
@@ -51,6 +51,6 @@ class MethodFacturationSeeder extends Seeder
                     ]);
                 });
             }
-        }*/
+        }
     }
 }

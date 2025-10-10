@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class EntrepriseAgendaController extends Controller
 {
-    public function agenda($uuid)
+    public function calendar($uuid)
     {
         $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
-        $parishes = Paroisses::all();
+        $paroisses = Paroisses::all();
 
         $ceremonies = DemandeCeremonie::with([
             'userParoisse.user',
@@ -32,9 +32,7 @@ class EntrepriseAgendaController extends Controller
             $extended = [
                 'familyContactName'  => $ceremony->contact_family_name,
                 'familyContactPhone' => $ceremony->telephone_contact_family,
-                'parishId'           => $ceremony->paroisse->id,
-                'parishName'         => $ceremony->paroisse->name,
-                'parishPhone'        => $ceremony->paroisse->phone,
+                'parish'             => $ceremony->paroisse,
                 'specialRequests'    => $ceremony->special_requests,
                 'amount'             => $ceremony->sum,
                 'paymentStatus'      => $ceremony->statut_paiement,
@@ -58,7 +56,7 @@ class EntrepriseAgendaController extends Controller
             ];
         });
 
-        return view('entreprise.agenda.view', compact('entreprise', 'parishes', 'events'));
+        return view('entreprise.agenda.calendar', compact('entreprise', 'paroisses', 'events'));
     }
 
     public function getWorkingDays(Request $request)
@@ -119,7 +117,7 @@ class EntrepriseAgendaController extends Controller
         }
 
         return redirect()
-            ->route('entreprise.agenda.view', ['uuid' => $uuid])
+            ->route('entreprise.agenda.calendar', ['uuid' => $uuid])
             ->with('success', $message);
     }
 

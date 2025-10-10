@@ -11,23 +11,18 @@ use Illuminate\Support\Facades\DB;
 
 class CalendarController extends Controller
 {
-    public function index(Request $request, string $uuid)
+    public function indexParoisse(string $uuid)
     {
-        $scope = $request->route('scope'); // injecté par defaults()
         $Entreprises = Entreprises::all();
+        $paroisse = Paroisses::where('uuid', $uuid)->firstOrFail();
+        return view('paroisses.agenda.calendar', ['paroisse' => $paroisse, 'entreprises' => $Entreprises]);
+    }
+
+    public function indexEntreprise(string $uuid)
+    {
+        $entrprise = Entreprises::where('uuid', $uuid)->firstOrFail();
         $Paroisses = Paroisses::all();
-
-        switch ($scope) {
-            case 'entreprise':
-                $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
-                return view('entreprises.calendar');
-
-            case 'paroisse':
-                $paroisse = Paroisses::where('uuid', $uuid)->firstOrFail();
-                return view('paroisses.agenda.calendar', ['paroisse' => $paroisse, 'entreprises' => $Entreprises]);
-
-        }
-        return redirect('/dashboard');
+        return view('entreprise.agenda.calendar', ['paroisses' => $Paroisses, 'entreprise' => $entrprise]);
     }
 
     public function events(Request $request, string $uuid)
@@ -39,21 +34,11 @@ class CalendarController extends Controller
             'affichage' => 'nullable|in:toutes,assignees,non_assignees',
         ]);
 
-        $scope = $request->route('scope');
-        [$entrepriseId, $paroisseId] = $this->resolveTenantIds($scope, $uuid);
-
         $from = Carbon::parse($request->get('from'));
         $to   = Carbon::parse($request->get('to'));
 
         $q = DemandeCeremonie::query()
             ->whereBetween('ceremony_date', [$from->toDateString(), $to->toDateString()]);
-
-        // Isolation par tenant
-        if ($scope === 'entreprise') {
-            $q->where('entreprise_id', $entrepriseId);
-        } else { // paroisse
-            $q->where('paroisse_id', $paroisseId);
-        }
 
         // Assignation (FK users) via assigned_at
         $aff = $request->get('affichage', 'toutes');
@@ -95,35 +80,6 @@ class CalendarController extends Controller
         return response()->json(['data' => $events]);
     }
 
-    public function store(Request $request, string $uuid)
-    {
-        $request->validate([
-            'title'    => 'required|string|max:255',
-            'start_at' => 'required|date',
-            'end_at'   => 'required|date|after:start_at',
-            'status'   => 'required|in:treatment,waiting,accepted,canceled,passed',
-        ]);
-
-        $scope = $request->route('scope', 'entreprise');
-        [$entrepriseId, $paroisseId] = $this->resolveTenantIds($scope, $uuid);
-
-        $start = Carbon::parse($request->input('start_at'));
-        $end   = Carbon::parse($request->input('end_at'));
-
-        $row = DemandeCeremonie::create([
-            'entreprise_id' => $scope === 'entreprise' ? $entrepriseId : null,
-            'paroisse_id'   => $scope === 'paroisse'   ? $paroisseId   : null,
-            'deceased_name' => $request->input('title'),
-            'ceremony_date' => $start->toDateString(),
-            'ceremony_hour' => $start->format('H:i:s'),
-            'duration_time' => $start->diffInMinutes($end),
-            'statut'        => $request->input('status'),
-            // 'assigned_at' => $request->user()->id, // si tu veux auto-assigner le créateur
-        ]);
-
-        return response()->json(['message' => 'Créé', 'id' => $row->id], 201);
-    }
-
     public function update(Request $request, string $uuid, DemandeCeremonie $ceremony)
     {
         $data = $request->validate([
@@ -157,34 +113,6 @@ class CalendarController extends Controller
         return response()->json(['message' => 'Mis à jour']);
     }
 
-    public function destroy(Request $request, string $uuid, DemandeCeremonie $ceremony)
-    {
-        $this->extracted($request, $uuid, $ceremony);
-
-        $ceremony->delete();
-        return response()->json(['message' => 'Supprimé']);
-    }
-
-    /**
-     * Résout l’ID interne depuis l’UUID et le scope.
-     * Tables d’après ta migration: `entreprise` et `paroisse` (singulier).
-     */
-    private function resolveTenantIds(string $scope, string $uuid): array
-    {
-        $entrepriseId = null;
-        $paroisseId   = null;
-
-        if ($scope === 'entreprise') {
-            $entrepriseId = (int) DB::table('entreprise')->where('uuid', $uuid)->value('id');
-            abort_unless($entrepriseId, 404);
-        } else { // paroisse
-            $paroisseId = (int) DB::table('paroisse')->where('uuid', $uuid)->value('id');
-            abort_unless($paroisseId, 404);
-        }
-
-        return [$entrepriseId, $paroisseId];
-    }
-
     /**
      * @param Request $request
      * @param string $uuid
@@ -203,4 +131,42 @@ class CalendarController extends Controller
             abort(404);
         }
     }
+
+    private function getAvailabilityForParoisse(int $paroisseId): ?array
+    {
+        $row = DB::table('availability_slots')->where('paroisse_id', $paroisseId)->first();
+        if (!$row) return null;
+
+        $days = $row->day_of_week;
+
+        if (is_string($days)) {
+            $decoded = json_decode($days, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $days = $decoded;
+            } else {
+                preg_match_all('/[1-7]/', $row->day_of_week, $m);
+                $days = array_map('intval', $m[0] ?? []);
+            }
+        }
+
+        $days = collect($days)->map(fn($d)=>(int)$d)->unique()->sort()->values()->all();
+
+        return [
+            'days'       => $days,                  // ex: [1,2,4,5,7]
+            'start_time' => $row->start_time ?? null, // ex: '10:30:00'
+            'end_time'   => $row->end_time   ?? null, // ex: '19:30:00'
+        ];
+    }
+
+    public function availability(string $uuid)
+    {
+        $paroisse = Paroisses::where('uuid', $uuid)->firstOrFail();
+
+        $cfg = $this->getAvailabilityForParoisse((int)$paroisse->id);
+        if (!$cfg) {
+            return response()->json(['days' => [], 'start_time' => null, 'end_time' => null]);
+        }
+        return response()->json($cfg);
+    }
+
 }

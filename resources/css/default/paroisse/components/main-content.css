@@ -2,7 +2,7 @@
     margin-top: 88px;
     margin-left: 198px;
     padding: 1.8rem 0.4rem;
-    min-height: calc(100vh - 110px);
+    min-height: 100vh;
     background: var(--color-bg);
 }
 

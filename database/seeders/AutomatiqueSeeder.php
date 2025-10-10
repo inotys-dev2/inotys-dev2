@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\AvailabilitySlot;
+use App\Models\DemandeCeremonie;
 use App\Models\UtilisateurEntreprise;
 use App\Models\UtilisateurParoisse;
 use App\Models\UtilisateurPermission;
@@ -33,6 +34,25 @@ class AutomatiqueSeeder extends Seeder
         ]);
         UtilisateurEntreprise::factory()->for($DirecteurMemorys, 'user')->for($Memorys, 'entreprise')->create();
         UtilisateurPermission::factory()->for($DirecteurMemorys, 'user')->for($Memorys, 'entreprise')->admin()->create();
+
+        $Diocese = ParoissesFactory::new()->create([
+            'name' => 'Diocese de Blois',
+            'email' => 'diocese@obsek.fr',
+        ]);
+
+        $DirecteurDiocese = UserFactory::new()->DirecteurParoisse()->create([
+            'email' => 'diocese@obsek.fr',
+            'password' => bcrypt('admin'),
+        ]);
+
+        $userparoises = UtilisateurParoisse::factory()->for($DirecteurDiocese, 'user')->for($Diocese, 'paroisse')->create();
+
+        DB::table('availability_slots')->insert([
+            'paroisse_id' => $Diocese->id,
+            'day_of_week' => "[1,2,4,5,7]",
+            'start_time'  => '10:30:00',
+            'end_time'    => '19:30:00',
+        ]);
 
         //------------------------------------------------
 
@@ -78,5 +98,16 @@ class AutomatiqueSeeder extends Seeder
         ]);
 
         // ---------------------------------------------------
+        //ajoute d'une demande entre l'entreprise memorys et la paroisse Diocese
+        $nombreDemandes = rand(1, 3);
+
+        DemandeCeremonie::factory()
+            ->count($nombreDemandes)
+            ->create([
+                'entreprise_id'        => $Memorys->id,                 // FK -> entreprise
+                'user_entreprise_id'   => $DirecteurMemorys->id,        // FK -> users (OBLIGATOIRE)
+                'paroisse_id'          => $Diocese->id,                 // FK -> paroisse
+                'users_paroisses_id'   => $userparoises->id // FK -> users_paroisses (nullable mais utile)
+            ]);
     }
 }

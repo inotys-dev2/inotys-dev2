@@ -8,8 +8,8 @@
     <h5>GESTION DES CÉRÉMONIES</h5>
 
     {{-- Agenda --}}
-    <a href="{{ route('entreprise.agenda.view', ['uuid' => $entreprise->uuid]) }}"
-       class="@activeClass('entreprise.agenda.view')">
+    <a href="{{ route('entreprise.agenda.calendar', ['uuid' => $entreprise->uuid]) }}"
+       class="@activeClass('entreprise.agenda.calendar')">
         <i class="fas fa-calendar-alt"></i> Agenda
     </a>
     <a href="{{ route('entreprise.agenda.demandes', ['uuid' => $entreprise->uuid]) }}"

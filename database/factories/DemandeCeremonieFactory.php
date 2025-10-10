@@ -10,28 +10,22 @@ class DemandeCeremonieFactory extends Factory
 
     public function definition()
     {
-        $status = $this->faker->randomElement(['a_traiter', 'passee']);
-        $score = 0;
-        $montant = $this->faker->randomFloat(2, 100, 1000);
-
-        if($status == 'a_traiter') {
-            $score = $this->faker->numberBetween(0, 5);
-        } else if($status == 'passee'){
-            $montant = 0;
-        }
+        $status = $this->faker->randomElement(['treatment', 'waiting', 'accepted', 'passed']);
+        $score = $this->faker->numberBetween(0, 5);
+        $sum = $this->faker->randomFloat(2, 100, 1000);
 
         return [
-            'nom_defunt' => $this->faker->name,
-            'date_ceremonie' => $this->faker->dateTimeBetween('+1 days', '+10 days')->format('Y-m-d'),
-            'heure_ceremonie' => $this->faker->time(),
-            'duree_minutes' => $this->faker->numberBetween(30, 180),
-            'nom_contact_famille' => $this->faker->name(),
-            'telephone_contact_famille' => $this->faker->phoneNumber(),
-            'demandes_speciales' => $this->faker->optional()->sentence(),
+            'deceased_name' => $this->faker->name,
+            'ceremony_date' => $this->faker->dateTimeBetween('+1 days', '+10 days')->format('Y-m-d'),
+            'ceremony_hour' => $this->faker->time(),
+            'duration_time' => $this->faker->numberBetween(30, 180),
+            'contact_family_name' => $this->faker->name(),
+            'telephone_contact_family' => $this->faker->phoneNumber(),
+            'special_requests' => $this->faker->optional()->sentence(),
             'score' => $score,
             'statut' => $status,
-            'montant' => $montant,
-            'statut_paiement' => $this->faker->randomElement(['en_attente']),
+            'sum' => $sum,
+            'statut_paiement' => $this->faker->randomElement(['define', 'waiting']),
         ];
     }
 }

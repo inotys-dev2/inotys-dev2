@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DemandeCeremonie extends Model
 {
     // Si ta table suit la convention (demande_ceremonies), inutile de préciser $table.
+    use HasFactory;
 
     protected $fillable = [
         'entreprise_id',

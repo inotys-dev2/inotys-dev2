@@ -90,12 +90,8 @@ Route::middleware(['auth', 'access:admin'])->group(function () {
  */
 Route::middleware(['auth', 'access:entreprise'])->group(function () {
      Route::get('entreprise/{uuid}/dashboard',               [EntrepriseController::class, 'dashboard'])->name('entreprise.dashboard');
-     Route::get('entreprise/{uuid}/agenda/view',             [EntrepriseAgendaController::class, 'agenda'])->name('entreprise.agenda.view');
-     Route::post('entreprise/{uuid}/agenda/working-days',    [EntrepriseAgendaController::class, 'getWorkingDays'])->name('entreprise.agenda.working-days');
-     Route::get('entreprise/{uuid}/agenda/demande',          [EntrepriseAgendaController::class, 'showForm'])->name('entreprise.agenda.demande');
-     Route::post('entreprise/{uuid}/agenda/demande',         [EntrepriseAgendaController::class, 'envoyer'])->name('entreprise.agenda.envoyer');
-     Route::get('entreprise/{uuid}/agenda/demandes',         [EntrepriseAgendaController::class, 'showAllDemande'])->name('entreprise.agenda.demandes');
-     Route::get('entreprise/{uuid}/agenda/demandes/{id}',    [EntrepriseAgendaController::class, 'detailDemande'])->name('entreprise.agenda.demandes.detail');
+     Route::get('entreprise/{uuid}/demandes',                [EntrepriseAgendaController::class, 'showAllDemande'])->name('entreprise.agenda.demandes');
+     Route::get('entreprise/{uuid}/demandes/{id}',           [EntrepriseAgendaController::class, 'detailDemande'])->name('entreprise.agenda.demandes.detail');
      Route::get('entreprise/{uuid}/paiement/creation_devis', [EntreprisePaiementController::class, 'creationDevis'])->name('entreprise.paiement.creation_devis');
      Route::get('entreprise/{uuid}/paiement/attentes',       [EntreprisePaiementController::class, 'attentes'])->name('entreprise.paiement.attentes');
      Route::get('entreprise/{uuid}/paiement/effectues',      [EntreprisePaiementController::class, 'effectues'])->name('entreprise.paiement.effectues');
@@ -105,12 +101,11 @@ Route::middleware(['auth', 'access:entreprise'])->group(function () {
      Route::get('entreprise/{uuid}/admin/membres',           [EntrepriseAdminController::class, 'membres'])->name('entreprise.admin.membres');
      Route::get('entreprise/{uuid}/admin/logs',              [EntrepriseAdminController::class, 'logs'])->name('entreprise.admin.logs');
 
-    Route::prefix('entreprise/{uuid}/agenda/calendar')->group(function () {
-        Route::get('/', [CalendarController::class, 'index'])->defaults('scope', 'entreprise')->name('entreprise.calendar');
-        Route::get('/events',   [CalendarController::class, 'events'])->defaults('scope', 'entreprise')->name('entreprise.calendar.events');
-        Route::post('/events',  [CalendarController::class, 'store'])->defaults('scope', 'entreprise')->name('entreprise.calendar.store');
-        Route::patch('/events/{ceremony}',  [CalendarController::class, 'update'])->whereNumber('ceremony')->defaults('scope', 'entreprise')->name('entreprise.calendar.update');
-        Route::delete('/events/{ceremony}', [CalendarController::class, 'destroy'])->whereNumber('ceremony')->defaults('scope', 'entreprise')->name('entreprise.calendar.destroy');
+    Route::prefix('entreprise/{uuid}/calendar')->group(function () {
+        Route::get('/', [CalendarController::class, 'indexEntreprise'])->name('entreprise.agenda.calendar');
+        Route::get('/events',   [CalendarController::class, 'events'])->name('entreprise.agenda.calendar.events');
+        Route::post('/events',  [CalendarController::class, 'store'])->name('entreprise.agenda.calendar.store');
+        Route::patch('/events/{ceremony}',  [CalendarController::class, 'update'])->whereNumber('ceremony')->name('entreprise.agenda.calendar.update');
     });
 });
 
@@ -127,11 +122,10 @@ Route::middleware(['auth', 'access:paroisse'])->group(function () {
     Route::post('paroisses/{uuid}/admin/profile',                [ParoissesProfileController::class, 'update'])    ->name('paroisses.profile.update');
 
     Route::prefix('paroisses/{uuid}/calendar')->group(function () {
-        Route::get('/', [CalendarController::class, 'index'])->defaults('scope', 'paroisse')->name('paroisses.calendar');
-        Route::get('/events', [CalendarController::class, 'events'])->defaults('scope', 'paroisse')->name('paroisses.calendar.events');
-        Route::post('/events', [CalendarController::class, 'store'])->defaults('scope', 'paroisse')->name('paroisses.calendar.store');
-        Route::patch('/events/{ceremony}', [CalendarController::class, 'update'])->whereNumber('ceremony')->defaults('scope', 'paroisse')->name('paroisses.calendar.update');
-        Route::delete('/events/{ceremony}', [CalendarController::class, 'destroy'])->whereNumber('ceremony')->defaults('scope', 'paroisse')->name('paroisses.calendar.destroy');
+        Route::get('/', [CalendarController::class, 'indexParoisse'])->name('paroisses.calendar');
+        Route::get('/events', [CalendarController::class, 'events'])->name('paroisses.calendar.events');
+        Route::patch('/events/{ceremony}', [CalendarController::class, 'update'])->whereNumber('ceremony')->name('paroisses.calendar.update');
+        Route::get('/availability', [CalendarController::class, 'availability'])->name('paroisses.availability');
     });
 });
 

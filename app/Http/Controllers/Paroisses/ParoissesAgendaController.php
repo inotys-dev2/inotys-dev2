@@ -16,11 +16,8 @@ class ParoissesAgendaController extends Controller {
     {
         $paroisse = Paroisses::where('uuid', $uuid)->firstOrFail();
 
-        $entreprises = Entreprises::all();
-
         return view('paroisses.agenda.calendar', [
             'paroisse' => $paroisse,
-            'entreprises' => $entreprises,
         ]);
     }
 }
