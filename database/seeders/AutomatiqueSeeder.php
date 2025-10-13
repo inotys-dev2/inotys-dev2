@@ -99,7 +99,7 @@ class AutomatiqueSeeder extends Seeder
 
         // ---------------------------------------------------
         //ajoute d'une demande entre l'entreprise memorys et la paroisse Diocese
-        $nombreDemandes = rand(1, 3);
+        $nombreDemandes = rand(50, 50);
 
         DemandeCeremonie::factory()
             ->count($nombreDemandes)
@@ -107,7 +107,7 @@ class AutomatiqueSeeder extends Seeder
                 'entreprise_id'        => $Memorys->id,                 // FK -> entreprise
                 'user_entreprise_id'   => $DirecteurMemorys->id,        // FK -> users (OBLIGATOIRE)
                 'paroisse_id'          => $Diocese->id,                 // FK -> paroisse
-                'users_paroisses_id'   => $userparoises->id // FK -> users_paroisses (nullable mais utile)
+                'users_paroisses_id'   => $userparoises->id,
             ]);
     }
 }

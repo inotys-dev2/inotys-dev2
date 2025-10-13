@@ -1,5 +1,10 @@
 :root {
     --color-link: #FFBD59;
+    --hour-col-w: 25px;       /* largeur de la colonne heures */
+    --row-h: 20px;            /* hauteur d’une ligne (1h dans ton rendu actuel) */
+    --grid-b: #eee;           /* bordures fines */
+    --grid-b-strong: #ddd;    /* bordures marquées */
+    --today-bg: rgba(25,118,210,.06);
 }
 
 body {
@@ -27,7 +32,6 @@ body {
     background-color: white;
     border: 1px var(--memorys-border) solid;
     border-radius: 4px;
-    z-index: 1000;
 }
 
 .btn:first-child {
@@ -163,14 +167,6 @@ body {
     margin-right: 8px;
 }
 
-:root{
-    --hour-col-w: 25px;       /* largeur de la colonne heures */
-    --row-h: 20px;            /* hauteur d’une ligne (1h dans ton rendu actuel) */
-    --grid-b: #eee;           /* bordures fines */
-    --grid-b-strong: #ddd;    /* bordures marquées */
-    --today-bg: rgba(25,118,210,.06);
-}
-
 .calendar-header {
     position: fixed;
     left: 256px;
@@ -184,7 +180,6 @@ body {
     font-size: 14px;
     padding: 4px;
     align-items: center;
-    z-index: 1000;
     height: 50px;
 }
 
@@ -223,29 +218,44 @@ body {
     display: none;
 }
 
-/* ====== Table commune aux vues jour/semaine/mois ====== */
-#calendar-content table {
+/* ===== Vue JOUR (table 2 colonnes) ===== */
+#calendar-content .jour {
+    height: 100%;
+    width: 100%;
+}
+
+#calendar-content .jour table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    table-layout: fixed;
     font-size: 13px;
 }
 
-/* En-têtes (jours en semaine/mois, cellule vide en jour) */
-#calendar-content thead th {
+/* Entête : 1ère cellule = libellé "Heure", 2ème = libellé jour */
+#calendar-content .jour thead th {
     position: sticky;
     top: 0;
     z-index: 2;
-    background: white;
+    background: #fff;
     border-bottom: 1px solid var(--grid-b-strong);
-    padding: 8px;
-    text-align: center;
-    height: var(--row-h);
+    padding: 10px 8px;
+    height: 40px;
+    font-weight: 600;
+    text-align: left;
     white-space: nowrap;
 }
 
-/* Première colonne (heures) — sticky à gauche pour jour/semaine */
-#calendar-content .hour-col {
+#calendar-content .jour thead th:first-child {
+    width: var(--hour-col-w);
+    min-width: var(--hour-col-w);
+    max-width: var(--hour-col-w);
+    text-align: right;
+    color: #666;
+}
+
+/* Colonne heures (sticky gauche) */
+#calendar-content .jour .hour-col {
     position: sticky;
     left: 0;
     z-index: 1;
@@ -257,180 +267,566 @@ body {
     color: #666;
     background: #fcfcfc;
     border-right: 1px solid #f3f3f3;
+    font-variant-numeric: tabular-nums;
 }
 
-/* Lignes d'heures pour jour/semaine */
-#calendar-content tbody .hour-row {
-    height: var(--row-h);
+/* Grille horaire */
+#calendar-content .jour tbody .hour-row {
+    height: 40px; /* ≈ 1h ; ajuste selon besoin */
 }
 
-/* Cellules communes */
-#calendar-content td,
-#calendar-content th {
+#calendar-content .jour tbody .hour-row td {
     border-right: 1px solid var(--grid-b);
-}
-#calendar-content td:last-child,
-#calendar-content th:last-child {
-    border-right: 0;
-}
-
-/* Quadrillage jour/semaine : ligne fine à chaque ligne + plus marqué chaque heure */
-#calendar-content tbody .hour-row td {
-    border-bottom: 1px dashed var(--grid-b);
     vertical-align: top;
     padding: 4px 6px;
 }
-#calendar-content tbody .hour-row + .hour-row td {
-    border-bottom-style: solid; /* accent si tu dupliques des demi-heures plus tard */
+#calendar-content .jour tbody .hour-row td:last-child {
+    border-right: 0;
 }
 
-/* Hover doux sur les cellules */
-#calendar-content td:hover { background: rgba(0,0,0,.025); }
-
-#calendar-content thead tr.semaine_name th {
-    font-weight: 600;
+/* Lignes : pointillés intra-heure + ligne pleine à chaque heure */
+#calendar-content .jour tbody .hour-row td {
+    border-bottom: 1px dashed var(--grid-b);
 }
-#calendar-content thead tr.semaine_name th:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 3;
+#calendar-content .jour tbody .hour-row + .hour-row td {
+    border-bottom-style: solid;
 }
 
-
-/* ====== Vue JOUR ====== */
-/* le thead ne contient qu’un th vide — on garde la bordure et la hauteur */
-#calendar-content tbody tr.hour-row td:first-child {
-    background: #fcfcfc;
+/* Cellule créneau (où ton UL d’événements est injecté) */
+#calendar-content .jour td.slot {
+    background: #fff;
+    transition: background-color .15s ease;
+    cursor: default;
+}
+#calendar-content .jour td.slot:hover {
+    background: rgba(0,0,0,.025);
 }
 
-/* ====== Vue MOIS ====== */
-#calendar-content .month table,
-#calendar-content .month thead th,
-#calendar-content .month tbody td { /* si tu ajoutes une classe .month au wrapper */
-    table-layout: fixed;
-}
-
-#calendar-content tbody tr td {
-    /* en mois, tes TD contiennent un <div> avec le numéro et un <ul> */
-    vertical-align: top;
-}
-
-/* Grille mois : carrés réguliers */
-#calendar-content thead + tbody tr td {
-    height: 60px;               /* adapte selon ton besoin */
-    border-bottom: 1px solid var(--grid-b);
-}
-#calendar-content thead + tbody tr:last-child td {
-    border-bottom: 0;
-}
-
-/* Numéro du jour en mois (c’est le <div> premier enfant que ton JS insère) */
-#calendar-content tbody td > div:first-child {
-    font-weight: 600;
-    font-size: 12px;
-    color: #444;
-    padding: 6px 6px 4px;
-}
-
-/* Liste d'événements en mois */
-#calendar-content tbody td > ul {
+/* Liste d’événements à l’heure H */
+#calendar-content .jour td.slot > ul {
     list-style: none;
     margin: 0;
-    padding: 0 6px 6px;
+    padding: 0 2px;
     display: grid;
     gap: 4px;
 }
-#calendar-content tbody td > ul li {
+#calendar-content .jour td.slot > ul > li {
     font-size: 12px;
-    line-height: 1.2;
-    padding: 2px 4px;
-    border-radius: 4px;
+    line-height: 1.25;
+    padding: 3px 6px;
+    border: 1px solid #ececec;
+    border-radius: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-/* Jour d’aujourd’hui (toutes vues) */
-.today-cell,
-td.today-cell {
+/* Heure courante (ta logique met .current-hour sur la ligne) */
+#calendar-content .jour tr.current-hour td.slot {
+    box-shadow: inset 0 0 0 2px var(--color-link);
+    background: rgba(255, 189, 89, .08); /* --color-link adouci */
+}
+#calendar-content .jour tr.current-hour .hour-col {
+    font-weight: 600;
+    color: #333;
+    background: #f6f6f6;
+}
+
+/* Aujourd’hui (par date) – déjà géré côté JS via data-date/time */
+#calendar-content .jour td.slot.current-day {
     background: var(--today-bg);
 }
 
-.week-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.week-table th, .week-table td {
-    border: 1px solid #e5e7eb; /* gris clair */
-    vertical-align: top;
-}
-
-.corner { width: 64px; }
-
-.hour-col {
-    width: 64px;
-    font-variant-numeric: tabular-nums;
-    background: #fafafa;
-    position: sticky;
-    left: 0;
-}
-
-.day-header {
-    text-align: center;
-    background: #f8fafc;
-    padding: 8px 0;
-}
-
-
-.day-header-inner {
-    display: inline-flex;
-    gap: 6px;
-    align-items: baseline;
-}
-
-.weekday { font-weight: 600; }
-.daynum {
+/* États “fermé / passé” que ton JS applique (grisés et non cliquables) */
+#calendar-content .jour .hour-closed {
     position: relative;
-    z-index: 100;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: #eef2ff; /* pastille douce */
+    opacity: .55;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(
+            45deg,
+            #f2f2f2, #f2f2f2 8px,
+            #e9e9e9 8px, #e9e9e9 16px
+        );
 }
 
-.day-header.is-today .daynum {
-    background: #2563eb !important;
-    color: white;
-}
-
-.slot { height: 48px; } /* hauteur d’une heure */
-
-.current-hour {
-    outline-offset: -2px;
-}
-
-.slot ul {
-    list-style: none;
-    margin: 4px;
-    padding: 0;
-    font-size: 12px;
-}
-
-.current-time-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--color-link);
+#calendar-content .jour .hour-passed:not(.hour-closed) {
+    background-color: #fafafa;
+    background-image:
+        linear-gradient(135deg, #f3f3f3 25%, transparent 25%),
+        linear-gradient(225deg, #f3f3f3 25%, transparent 25%),
+        linear-gradient(45deg,  #f3f3f3 25%, transparent 25%),
+        linear-gradient(315deg, #f3f3f3 25%, #fafafa 25%);
+    background-size: 10px 10px;
+    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+    opacity: .9;
     pointer-events: none;
 }
 
-/* ————————————————————————————————
-   📅  Styles pour jours / heures non travaillés
-   ———————————————————————————————— */
+/* Petites améliorations de lisibilité */
+#calendar-content .jour tbody .hour-row:hover .hour-col {
+    background: #f7f7f7;
+}
 
+/* Responsive léger : sur écrans étroits, compacter un peu */
+@media (max-width: 1200px) {
+    #calendar-content .jour tbody .hour-row { height: 36px; }
+    #calendar-content .jour td.slot > ul > li { font-size: 11px; padding: 2px 6px; }
+}
+
+/* ================================
+   SEMAINE — design clean & lisible
+   ================================ */
+
+#calendar-content .semaine {
+    --row-h: 48px;          /* hauteur d’1h */
+    --hour-col-w: 76px;     /* largeur colonne heures */
+    --head-bg: #fafafa;     /* fond entête */
+    --grid: #edf0f2;        /* quadrillage doux */
+    --grid-strong: #dfe5ea; /* ligne heure pleine */
+}
+
+/* Table (1 col heures + 7 jours) */
+#calendar-content .semaine table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    font-size: 13px;
+    background: #fff;
+}
+
+/* ——— ENTÊTES ——— */
+#calendar-content .semaine thead th {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 56px;
+    background: var(--head-bg);
+    border-bottom: 1px solid var(--grid-strong);
+    white-space: nowrap;
+    font-weight: 500;
+    padding: 0 8px;
+}
+
+/* Coin au-dessus des heures */
+#calendar-content .semaine thead th.corner {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    width: var(--hour-col-w);
+    min-width: var(--hour-col-w);
+    max-width: var(--hour-col-w);
+    background: #f6f7f9;
+    border-right: 1px solid var(--grid-strong);
+}
+
+/* En-têtes des jours */
+#calendar-content .semaine thead th.day-header { text-align: center; }
+#calendar-content .semaine thead th.day-header .day-header-inner {
+    display: inline-flex; gap: 8px; align-items: center;
+}
+#calendar-content .semaine thead th.day-header .weekday {
+    font-weight: 600; color: #1f2937;
+}
+#calendar-content .semaine thead th.day-header .daynum {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 999px;
+    font-weight: 700; background: #eef2ff; color: #1e3a8a;
+}
+#calendar-content .semaine thead th.day-header.is-today { background: #f1f5ff; }
+#calendar-content .semaine thead th.day-header.is-today .daynum {
+    background: var(--color-link); color: #fff;
+    box-shadow: 0 0 0 4px rgba(255,189,89,.18);
+}
+
+/* ——— COLONNE HEURES (sticky) ——— */
+#calendar-content .semaine td.hour-col {
+    position: sticky; left: 0; z-index: 1;
+    width: var(--hour-col-w); min-width: var(--hour-col-w); max-width: var(--hour-col-w);
+    text-align: right; padding: 0 10px 0 6px;
+    color: #64748b; background: #fbfbfc;
+    border-right: 1px solid var(--grid-strong);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ——— QUADRILLAGE ——— */
+#calendar-content .semaine td,
+#calendar-content .semaine th { border-right: 1px solid var(--grid); }
+#calendar-content .semaine td:last-child,
+#calendar-content .semaine th:last-child { border-right: 0; }
+
+#calendar-content .semaine tbody tr { height: var(--row-h); }
+#calendar-content .semaine tbody tr td {
+    position: relative; padding: 0; vertical-align: top;
+    border-bottom: 1px solid var(--grid-strong); /* heure pleine */
+}
+
+/* Alternance légère */
+#calendar-content .semaine tbody tr:nth-child(even) td.slot { background-color: #fcfdff; }
+
+/* ——— CELLULES JOUR ——— */
+#calendar-content .semaine td.slot { position: relative; transition: background-color .12s ease, box-shadow .12s ease; }
+#calendar-content .semaine td.slot:hover { background: rgba(2,132,199,.04); }
+
+#calendar-content .semaine td.slot.current-hour {
+    background-image: linear-gradient(to right, rgba(2,132,199,.06), transparent);
+}
+
+/* ——— LIGNE DE L’HEURE COURANTE (si ton JS l’injecte) ——— */
+#calendar-content .semaine .slot { position: relative; }
+#calendar-content .semaine .current-time-line {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: var(--color-link);
+    box-shadow: 0 0 0 2px rgba(255,189,89,.15);
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* =========================
+   COUCHE JOUR + ÉVÉNEMENTS
+   ========================= */
+
+/* La couche jour (accrochée sur la cellule 00:00) s’étend sur 24h */
+#calendar-content .semaine .day-layer {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: calc(var(--row-h) * 24);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Chaque event est dans un <li> positionné par l’enfant .ceremony */
+#calendar-content .semaine .day-layer > li {
+    position: absolute;
+    /* variables pilotées par le JS */
+    top:    calc( (var(--start-min)  / 60) * var(--row-h) );
+    height: calc( (var(--height-min) / 60) * var(--row-h) );
+
+    /* mise en colonnes */
+    --pad: 6px;         /* marge intérieure colonne */
+    --col-gap: 6px;     /* espace entre colonnes */
+    /* largeur dispo = 100% - 2*pad - (colCount-1)*gap */
+    width: calc(
+        (100% - (2 * var(--pad)) - ((var(--col-count) - 1) * var(--col-gap))) / var(--col-count)
+    );
+    left: calc(var(--pad) + ( ( (100% - (2 * var(--pad)) - ((var(--col-count) - 1) * var(--col-gap))) / var(--col-count) ) + var(--col-gap) ) * var(--col-index));
+
+    list-style: none;
+    margin: 0; padding: 0;
+    z-index: calc(2 + var(--col-index)); /* petite stratification */
+}
+#calendar-content .semaine .day-layer > li .ceremony {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    font-size: 12px; line-height: 1.25;
+    padding: 8px 10px;
+    border: 1px solid #e7ebf0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    transition: box-shadow .12s ease, transform .12s ease;
+    pointer-events: auto;
+}
+#calendar-content .semaine .day-layer > li .ceremony:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+/* Contenu interne */
+#calendar-content .semaine .ceremony .ceremony-title {
+    font-weight: 700; margin: 0 0 2px 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#calendar-content .semaine .ceremony .ceremony-datetime {
+    margin: 0; font-size: 11px; color: #55627a;
+}
+#calendar-content .semaine .ceremony .ceremony-special-request {
+    margin: 4px 0 0; font-size: 11px; color: #804b00; white-space: normal;
+}
+
+/* Statuts (couleurs) — fonctionne avec li[data-status] ET .status-xxx */
+#calendar-content .semaine .day-layer > li[data-status="confirmed"] .ceremony,
+#calendar-content .semaine .ceremony.status-confirmed,
+#calendar-content .semaine .ceremony.status-confirmee {
+    background:#eaf6ee; border-color:#cfe9d6; color:#185a37;
+}
+#calendar-content .semaine .day-layer > li[data-status="pending"] .ceremony,
+#calendar-content .semaine .ceremony.status-pending,
+#calendar-content .semaine .ceremony.status-a_traiter {
+    background:#fff8e6; border-color:#f2e3b9; color:#7a5b00;
+}
+#calendar-content .semaine .day-layer > li[data-status="canceled"] .ceremony,
+#calendar-content .semaine .ceremony.status-canceled,
+#calendar-content .semaine .ceremony.status-annulee {
+    background:#fde8ea; border-color:#f4c9cf; color:#8a2530;
+}
+#calendar-content .semaine .day-layer > li[data-status="passed"] .ceremony,
+#calendar-content .semaine .ceremony.status-passed,
+#calendar-content .semaine .ceremony.status-passee {
+    background:#f3f4f6; border-color:#e5e7eb; color:#374151; opacity:.95;
+}
+
+/* Score (liseré gauche) */
+#calendar-content .semaine .ceremony[class*="score-"] { padding-left: 12px; }
+#calendar-content .semaine .ceremony.score-3 { border-left: 4px solid #60a5fa; }
+#calendar-content .semaine .ceremony.score-4 { border-left: 5px solid #3b82f6; }
+#calendar-content .semaine .ceremony.score-5 { border-left: 6px solid #2563eb; }
+
+/* Responsive léger */
+@media (max-width: 1200px) {
+    #calendar-content .semaine { --hour-col-w: 60px; --row-h: 44px; }
+    #calendar-content .semaine thead th { height: 50px; }
+}
+
+/* =========================
+   SEMAINE — Popup (modal)
+   ========================= */
+#calendar-content .semaine .ceremony-modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    place-items: center;
+    background: rgba(15, 23, 42, .35); /* overlay sombre doux */
+    z-index: 9000;
+}
+#calendar-content .semaine .ceremony-modal-overlay.is-open { display: grid; }
+
+#calendar-content .semaine .ceremony-modal {
+    position: absolute;
+    top: 115px;
+    height: 550px;
+    overflow: auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    padding: 16px 18px 18px;
+    transform: translateY(6px) scale(.98);
+    opacity: 0;
+    transition: transform .18s ease, opacity .18s ease;
+}
+#calendar-content .semaine .ceremony-modal-overlay.is-open .ceremony-modal {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+#calendar-content .semaine .ceremony-modal .modal-close {
+    all: unset;
+    position: sticky; top: 0; float: right;
+    width: 32px; height: 32px; line-height: 32px; text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 22px;
+    color: #334155;
+}
+#calendar-content .semaine .ceremony-modal .modal-close:hover {
+    background: #f1f5f9;
+}
+
+#calendar-content .semaine .ceremony-modal .modal-title {
+    margin: 6px 8px 10px 4px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+#calendar-content .semaine .ceremony-modal .modal-section {
+    border: 1px solid #e7ebf0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 10px 0;
+    background: #fbfdff;
+}
+#calendar-content .semaine .ceremony-modal .modal-section.meta { background: #fff; }
+
+#calendar-content .semaine .ceremony-modal .section-title {
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #0f172a;
+}
+
+#calendar-content .semaine .ceremony-modal .row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    padding: 6px 0;
+    border-top: 1px dashed #e5e7eb;
+}
+#calendar-content .semaine .ceremony-modal .row:first-child { border-top: 0; }
+
+#calendar-content .semaine .ceremony-modal .k { color: #64748b; }
+#calendar-content .semaine .ceremony-modal .v { color: #111827; }
+
+/* Statut en chip (reuse des couleurs existantes) */
+#calendar-content .semaine .status-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 12px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+#calendar-content .semaine .status-chip.status-confirmed,
+#calendar-content .semaine .status-chip.status-confirmee {
+    background:#eaf6ee; border-color:#cfe9d6; color:#185a37;
+}
+#calendar-content .semaine .status-chip.status-pending,
+#calendar-content .semaine .status-chip.status-a_traiter {
+    background:#fff8e6; border-color:#f2e3b9; color:#7a5b00;
+}
+#calendar-content .semaine .status-chip.status-canceled,
+#calendar-content .semaine .status-chip.status-annulee {
+    background:#fde8ea; border-color:#f4c9cf; color:#8a2530;
+}
+#calendar-content .semaine .status-chip.status-passed,
+#calendar-content .semaine .status-chip.status-passee {
+    background:#f3f4f6; border-color:#e5e7eb; color:#374151;
+}
+
+
+#calendar-content .mois {
+    height: 100%;
+    width: 100%;
+    background: #fff;
+    --grid: #edf0f2;
+    --grid-strong: #dfe5ea;
+}
+
+/* Table à 7 colonnes égales */
+#calendar-content .mois table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid var(--grid-strong);
+    border-radius: 6px;
+}
+
+/* En-tête des jours (Lun, Mar...) */
+#calendar-content .mois thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 44px;
+    background: #fafafa;
+    border-bottom: 1px solid var(--grid-strong);
+    text-align: center;
+    font-weight: 600;
+    color: #1f2937;
+    letter-spacing: 0.2px;
+}
+
+/* Cellules jour */
+#calendar-content .mois tbody td {
+    vertical-align: top;
+    border-right: 1px solid var(--grid);
+    border-bottom: 1px solid var(--grid);
+    padding: 6px;
+    height: 110px;
+    background-color: #fff;
+    transition: background-color .15s ease;
+}
+
+/* Lignes de fin et bordures arrondies */
+#calendar-content .mois tbody tr:last-child td {
+    border-bottom: none;
+}
+#calendar-content .mois tbody td:last-child {
+    border-right: none;
+}
+
+/* Numéro du jour */
+#calendar-content .mois tbody td > div.day-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    font-weight: 600;
+    font-size: 12px;
+    color: #1e3a8a;
+    background: #eef2ff;
+    border-radius: 999px;
+    margin-bottom: 4px;
+}
+
+#calendar-content .mois tbody td.today-cell {
+    box-shadow: inset 0 0 0 2px var(--color-link);
+}
+
+/* Jour d'aujourd'hui */
+#calendar-content .mois tbody td.today-cell > div.day-number {
+    background: var(--color-link);
+    color: white;
+    box-shadow: 0 0 0 3px rgba(255,189,89,.25);
+}
+
+/* Jours hors du mois courant */
+#calendar-content .mois tbody td.other-month {
+    background-color: #fafafa;
+    color: #9ca3af;
+    opacity: 0.7;
+}
+
+/* Hover doux */
+#calendar-content .mois tbody td:hover {
+    background: rgba(2,132,199,.04);
+}
+
+/* Liste d’événements dans chaque case */
+#calendar-content .mois tbody td > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+}
+
+#calendar-content .mois tbody td > ul > li {
+    font-size: 12px;
+    line-height: 1.2;
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .1s ease;
+}
+
+#calendar-content .mois tbody td > ul > li:hover {
+    background: #f8fafc;
+}
+
+/* États de statut (si utilisés) */
+#calendar-content .mois .event.status-confirmee { background:#eaf6ee; border-color:#cfe9d6; color:#185a37; }
+#calendar-content .mois .event.status-a_traiter { background:#fff8e6; border-color:#f2e3b9; color:#7a5b00; }
+#calendar-content .mois .event.status-annulee { background:#fde8ea; border-color:#f4c9cf; color:#8a2530; }
+#calendar-content .mois .event.status-passee { background:#f3f4f6; border-color:#e5e7eb; color:#374151; }
+
+/* Responsive */
+@media (max-width: 1200px) {
+    #calendar-content .mois tbody td {
+        height: 90px;
+        padding: 4px;
+    }
+    #calendar-content .mois tbody td > div.day-number {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+    }
+    #calendar-content .mois tbody td > ul > li {
+        font-size: 11px;
+        padding: 2px 4px;
+    }
+}
 
 .hour-passed,
 .day-passed,
@@ -474,41 +870,5 @@ td.today-cell {
 }
 
 .week-table.thead th, .day-header.day-passed, .day-header.day-closed, .day-header {
-    background: white !important;
     opacity: 1 !important;
-}
-
-/* Optionnel : pour la cellule “entête jour” en semaine */
-.week-table th.day-passed .daynum {
-    text-decoration: line-through;
-}
-
-/* Créneaux normaux : hover clair */
-.slot:hover {
-    background-color: #f0f7ff;
-    cursor: pointer;
-}
-
-/* Événement sélectionné (si tu en as) */
-.slot.selected {
-    background-color: #cce5ff;
-    border: 1px solid #99caff;
-}
-
-/* Événements confirmés / annulés (si tu affiches des statuts) */
-.event.status-confirmee {
-    background: #d4edda;
-    color: #155724;
-}
-.event.status-a_traiter {
-    background: #fff3cd;
-    color: #856404;
-}
-.event.status-annulee {
-    background: #f8d7da;
-    color: #721c24;
-}
-.event.status-passee {
-    background: #e2e3e5;
-    color: #383d41;
 }

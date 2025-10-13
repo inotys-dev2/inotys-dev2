@@ -25,43 +25,49 @@ class CalendarController extends Controller
         return view('entreprise.agenda.calendar', ['paroisses' => $Paroisses, 'entreprise' => $entrprise]);
     }
 
-    public function events(Request $request, string $uuid)
+    public function events(Request $request)
     {
-        $request->validate([
-            'from'    => 'required|date',
-            'to'      => 'required|date|after:from',
-            'tags'    => 'nullable|array',
-            'affichage' => 'nullable|in:toutes,assignees,non_assignees',
+        $data = $request->validate([
+            'from'          => 'required|date',
+            'to'            => 'required|date|after:from',
+            'paroisse_id'   => 'nullable|integer|exists:paroisse,id',
+            'entreprise_id' => 'nullable|integer|exists:entreprises,id',
+            'tags'          => 'nullable|array',
+            'affichage'     => 'nullable|in:toutes,assignees,non_assignees',
         ]);
 
-        $from = Carbon::parse($request->get('from'));
-        $to   = Carbon::parse($request->get('to'));
+        $from = Carbon::parse($data['from'])->startOfDay();
+        $to   = Carbon::parse($data['to'])->endOfDay();
+
+        $allowed = ['treatment','waiting','accepted','canceled','passed'];
+        $tags = array_values(array_intersect($data['tags'] ?? [], $allowed));
 
         $q = DemandeCeremonie::query()
-            ->whereBetween('ceremony_date', [$from->toDateString(), $to->toDateString()]);
+            ->with('entreprise')
+            ->whereBetween('ceremony_date', [$from->toDateString(), $to->toDateString()])
+            ->when(!empty($data['paroisse_id'] ?? null), fn($q) =>
+            $q->where('paroisse_id', $data['paroisse_id'])
+            )
+            ->when(!empty($data['entreprise_id'] ?? null), fn($q) =>
+            $q->where('entreprise_id', $data['entreprise_id'])
+            )
+            ->when(($data['affichage'] ?? 'toutes') === 'assignees', fn($q) =>
+            $q->where('assigned_at', $request->user()->id)
+            )
+            ->when(($data['affichage'] ?? 'toutes') === 'non_assignees', fn($q) =>
+            $q->whereNull('assigned_at')
+            )
+            ->when(!empty($tags), fn($q) => $q->whereIn('statut', $tags))
+            ->orderBy('ceremony_date');
 
-        // Assignation (FK users) via assigned_at
-        $aff = $request->get('affichage', 'toutes');
-        if ($aff === 'assignees')     $q->where('assigned_at', $request->user()->id);
-        if ($aff === 'non_assignees') $q->whereNull('assigned_at');
+        $rows = $q->get();
 
-        // Tags -> statut (ENUM exact)
-        $allowed = ['treatment','waiting','accepted','canceled','passed'];
-        $tags = collect((array)$request->get('tags', []))
-            ->filter(fn($t) => in_array($t, $allowed, true))
-            ->values()->all();
-
-        if (!empty($tags)) {
-            $q->whereIn('statut', $tags);
-        }
-
-        $rows = $q->orderBy('ceremony_date')->get();
-
-        $events = $rows->map(function($c) use ($q) {
+        $events = $rows->map(function ($c) {
             $date = Carbon::parse($c->ceremony_date);
             [$H,$M,$S] = array_pad(explode(':', $c->ceremony_hour ?: '00:00:00'), 3, '00');
             $start = $date->copy()->setTime((int)$H, (int)$M, (int)$S);
             $end   = $start->copy()->addMinutes(($c->duration_time ?? 60));
+
             return [
                 'id'     => $c->id,
                 'title'  => $c->deceased_name ?? 'Cérémonie',
@@ -73,11 +79,20 @@ class CalendarController extends Controller
                 'special_request' => $c->special_request,
                 'contact_family_name' => $c->contact_family_name,
                 'contact_family_phone' => $c->telephone_contact_family,
-                'pompe_funebre' => Entreprises::where('id', $c->entreprise_id)->get()->first(),
+                'pompe_funebre' => $c->entreprise,
             ];
         });
 
-        return response()->json(['data' => $events]);
+        // Si une paroisse est sélectionnée → on ajoute les dispos dans le même JSON
+        $availability = null;
+        if (!empty($data['paroisse_id'])) {
+            $availability = $this->getAvailabilityForParoisse((int)$data['paroisse_id']);
+        }
+
+        return response()->json([
+            'data' => $events,
+            'availability' => $availability,
+        ]);
     }
 
     public function update(Request $request, string $uuid, DemandeCeremonie $ceremony)
@@ -111,25 +126,6 @@ class CalendarController extends Controller
 
         $ceremony->fill($data)->save();
         return response()->json(['message' => 'Mis à jour']);
-    }
-
-    /**
-     * @param Request $request
-     * @param string $uuid
-     * @param DemandeCeremonie $ceremony
-     * @return void
-     */
-    public function extracted(Request $request, string $uuid, DemandeCeremonie $ceremony): void
-    {
-        $scope = $request->route('scope', 'entreprise');
-        [$entrepriseId, $paroisseId] = $this->resolveTenantIds($scope, $uuid);
-
-        if ($scope === 'entreprise' && (int)$ceremony->entreprise_id !== (int)$entrepriseId) {
-            abort(404);
-        }
-        if ($scope === 'paroisse' && (int)$ceremony->paroisse_id !== (int)$paroisseId) {
-            abort(404);
-        }
     }
 
     private function getAvailabilityForParoisse(int $paroisseId): ?array
@@ -168,5 +164,4 @@ class CalendarController extends Controller
         }
         return response()->json($cfg);
     }
-
 }
