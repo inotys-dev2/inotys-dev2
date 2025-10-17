@@ -2,6 +2,8 @@
 namespace Database\Seeders;
 
 use App\Models\Entreprises;
+use App\Models\User;
+use App\Models\UtilisateurParoisse;
 use Illuminate\Database\Seeder;
 use App\Models\Paroisses;
 use App\Models\DemandeCeremonie;
@@ -25,8 +27,8 @@ class MethodFacturationSeeder extends Seeder
                     $demande = DemandeCeremonie::factory()
                         ->for($pompe, 'entreprise')
                         ->for($paroisse, 'paroisse')
-                        ->for(\App\Models\UtilisateurParoisse::factory(), 'users_paroisses')
-                        ->for(\App\Models\User::factory(), 'createur')
+                        ->for(UtilisateurParoisse::factory(), 'users_paroisses')
+                        ->for(User::factory(), 'createur')
                         ->create([
                             'paroisse_id' => $paroisse->id,
                             'entreprise_id' => $pompe->id,

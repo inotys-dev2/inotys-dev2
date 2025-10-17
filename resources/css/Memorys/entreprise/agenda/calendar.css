@@ -5,6 +5,20 @@
     --grid-b: #eee;           /* bordures fines */
     --grid-b-strong: #ddd;    /* bordures marquées */
     --today-bg: rgba(25,118,210,.06);
+
+
+
+
+    /* Base scale */
+    --z-base: 0;
+    --z-content: 300;          /* zone scrollable du calendrier */
+    --z-header: 350;           /* .calendar-header (en-tête sous la navbar) */
+    --z-nav: 400;              /* .calendar-nav (barre d’actions) */
+    --z-dropdown-trigger: 420; /* boutons qui ouvrent des menus */
+    --z-dropdown: 500;         /* panneaux dropdown / multiselect */
+    --z-tooltip: 550;          /* tooltips éventuels */
+    --z-overlay: 9000;         /* backdrop */
+    --z-modal: 9010;           /* modales au-dessus de l’overlay */
 }
 
 body {
@@ -18,6 +32,7 @@ body {
     flex-direction: column;
     padding-top: 66px;
     padding-bottom: 60px;
+    z-index: var(--z-base);
 }
 
 .calendar-nav {
@@ -32,11 +47,30 @@ body {
     background-color: white;
     border: 1px var(--memorys-border) solid;
     border-radius: 4px;
+    z-index: var(--z-nav);
 }
 
 .btn:first-child {
     margin-left: 8px;
 }
+
+#btn-new {
+    background-color: var(--color-link);
+    color: #fff;
+    border: 1px solid var(--color-link);
+    border-radius: 4px;
+    height: 32px;
+    padding: 5px 10px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    z-index: calc(var(--z-header) + 1); /* cliquables au-dessus du header */
+}
+
+#btn-new:hover { filter: brightness(0.98); }
+#btn-new:active { transform: translateY(1px); }
 
 .btn {
     display: flex;
@@ -44,12 +78,13 @@ body {
     justify-content: center;
     background-color: white;
     color: var(--color-link);
-    margin: 5px;
+    margin: 2px;
     font-size: 14px;
     border: 1px #B8B8B8 solid;
     border-radius: 4px;
     padding: 5px 10px;
     height: 32px;
+    z-index: calc(var(--z-header) + 1); /* cliquables au-dessus du header */
 }
 
 .btn svg {
@@ -72,6 +107,8 @@ body {
 .btn.selected {
     border: 2px var(--color-link) solid;
 }
+
+.badge { margin-left: 6px; font-size: 10px; padding: 2px 6px; border-radius: 999px; background: #eef2ff; }
 
 #now {
     border-color: var(--color-link);
@@ -101,12 +138,7 @@ body {
     justify-content: center;
     padding: 4px 30px 4px 12px;
     color: var(--color-link);
-}
-
-.tags-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    z-index: calc(var(--z-header) + 1); /* cliquables au-dessus du header */
 }
 
 .tag-btn {
@@ -122,6 +154,26 @@ body {
     height: 32px;
 }
 
+.tag-btn.green {
+    color: green;
+}
+
+.tag-btn.orange {
+    color: orange;
+}
+
+.tag-btn.yellow {
+    color: dodgerblue;
+}
+
+.tag-btn.gray {
+    color: gray;
+}
+
+.tag-btn.red {
+    color: red;
+}
+
 .tag-btn.active.green {
     background-color: green;
     color: white;
@@ -134,6 +186,12 @@ body {
     border-color: orange;
 }
 
+.tag-btn.active.yellow {
+    background-color: dodgerblue;
+    color: white;
+    border-color: dodgerblue;
+}
+
 .tag-btn.active.gray {
     background-color: gray;
     color: white;
@@ -144,27 +202,6 @@ body {
     background-color: red;
     color: white;
     border-color: red;
-}
-
-.tag-btn.active .tag-icon {
-    background-color: white;
-}
-
-.tag-icon {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 6px;
-}
-
-.tag-icon.orange { background-color: orange; }
-.tag-icon.green { background-color: green;}
-.tag-icon.rouge { background-color: red; }
-.tag-icon.gris { background-color: gray; }
-
-.tag-btn:last-child {
-    margin-right: 8px;
 }
 
 .calendar-header {
@@ -181,9 +218,11 @@ body {
     padding: 4px;
     align-items: center;
     height: 50px;
+    z-index: var(--z-header);
 }
 
 #prev, #next {
+    position: relative;
     display: flex;
     border-radius: 2px;
     border: 1px transparent solid;
@@ -191,6 +230,7 @@ body {
     height: 32px;
     align-items: center;
     transition: all 0.4s ease;
+    z-index: calc(var(--z-header) + 1); /* cliquables au-dessus du header */
 }
 
 #next:hover, #prev:hover {
@@ -211,7 +251,8 @@ body {
     border: 1px solid #B8B8B8;
     border-top: none;
     border-radius: 0 0 4px 4px;
-    --hour-col-w: 72px;
+    --hour-col-w: 55px;
+    z-index: var(--z-content);
 }
 
 #calendar-content::-webkit-scrollbar {
@@ -220,6 +261,7 @@ body {
 
 /* ===== Vue JOUR (table 2 colonnes) ===== */
 #calendar-content .jour {
+    --row-h: 40px;
     height: 100%;
     width: 100%;
 }
@@ -236,7 +278,7 @@ body {
 #calendar-content .jour thead th {
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: calc(var(--z-content) + 20);
     background: #fff;
     border-bottom: 1px solid var(--grid-b-strong);
     padding: 10px 8px;
@@ -258,15 +300,15 @@ body {
 #calendar-content .jour .hour-col {
     position: sticky;
     left: 0;
-    z-index: 1;
+    z-index: calc(var(--z-content) + 10);
     width: var(--hour-col-w);
     min-width: var(--hour-col-w);
     max-width: var(--hour-col-w);
     text-align: right;
-    padding: 0 8px 0 6px;
-    color: #666;
-    background: #fcfcfc;
-    border-right: 1px solid #f3f3f3;
+    padding: 0 10px 0 6px;
+    color: #64748b;
+    background: #fbfbfc;
+    border-right: 1px solid var(--grid-strong);
     font-variant-numeric: tabular-nums;
 }
 
@@ -292,25 +334,64 @@ body {
     border-bottom-style: solid;
 }
 
-/* Cellule créneau (où ton UL d’événements est injecté) */
-#calendar-content .jour td.slot {
-    background: #fff;
-    transition: background-color .15s ease;
-    cursor: default;
-}
 #calendar-content .jour td.slot:hover {
     background: rgba(0,0,0,.025);
 }
 
-/* Liste d’événements à l’heure H */
-#calendar-content .jour td.slot > ul {
-    list-style: none;
-    margin: 0;
-    padding: 0 2px;
-    display: grid;
-    gap: 4px;
+#calendar-content .jour    .day-layer {
+    position: absolute;
+    left: 54px; right: 0; top: 0;
+    height: calc(var(--row-h) * 24);
+    pointer-events: none;
+    z-index: calc(var(--z-content) + 5);
 }
-#calendar-content .jour td.slot > ul > li {
+
+#calendar-content .jour    .day-layer > li {
+    position: absolute;
+
+    /* positionnement vertical par variables (déjà posées par ton JS) */
+    top:    calc( (var(--start-min)  / 60) * var(--row-h) );
+    height: calc( (var(--height-min) / 60) * var(--row-h) );
+    /* colonnes (overlaps) identiques à la semaine */
+    --pad: 6px;
+    --col-gap: 6px;
+    width: calc(
+        (100% - (2 * var(--pad)) - ((var(--col-count) - 1) * var(--col-gap))) / var(--col-count)
+    );
+    left: calc(
+        var(--pad) + (
+        ((100% - (2 * var(--pad)) - ((var(--col-count) - 1) * var(--col-gap))) / var(--col-count))
+        + var(--col-gap)
+        ) * var(--col-index)
+    );
+
+    list-style: none;
+    margin: 0; padding: 0;
+    z-index: calc(2 + var(--col-index));
+}
+
+#calendar-content .jour    .day-layer > li .ceremony {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    font-size: 12px; line-height: 1.25;
+    padding: 8px 10px;
+    border: 1px solid #e7ebf0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    transition: box-shadow .12s ease, transform .12s ease;
+    pointer-events: auto; /* pour être cliquable malgré la layer en pointer-events:none */
+}
+
+#calendar-content .jour    .day-layer > li .ceremony:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+
+#calendar-content .jour td.slot > li {
     font-size: 12px;
     line-height: 1.25;
     padding: 3px 6px;
@@ -337,36 +418,26 @@ body {
     background: var(--today-bg);
 }
 
-/* États “fermé / passé” que ton JS applique (grisés et non cliquables) */
-#calendar-content .jour .hour-closed {
-    position: relative;
-    opacity: .55;
-    pointer-events: none;
-    background:
-        repeating-linear-gradient(
-            45deg,
-            #f2f2f2, #f2f2f2 8px,
-            #e9e9e9 8px, #e9e9e9 16px
-        );
-}
-
-#calendar-content .jour .hour-passed:not(.hour-closed) {
-    background-color: #fafafa;
-    background-image:
-        linear-gradient(135deg, #f3f3f3 25%, transparent 25%),
-        linear-gradient(225deg, #f3f3f3 25%, transparent 25%),
-        linear-gradient(45deg,  #f3f3f3 25%, transparent 25%),
-        linear-gradient(315deg, #f3f3f3 25%, #fafafa 25%);
-    background-size: 10px 10px;
-    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
-    opacity: .9;
-    pointer-events: none;
-}
-
 /* Petites améliorations de lisibilité */
 #calendar-content .jour tbody .hour-row:hover .hour-col {
     background: #f7f7f7;
 }
+
+/* Titre / sous-texte identiques */
+#calendar-content .jour    .ceremony .ceremony-title {
+    font-weight: 700;
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#calendar-content .jour    .ceremony .ceremony-datetime {
+    margin: 0; font-size: 11px; color: #55627a;
+}
+#calendar-content .jour    .ceremony .ceremony-special-request {
+    margin: 4px 0 0; font-size: 11px; color: #804b00; white-space: normal;
+}
+
 
 /* Responsive léger : sur écrans étroits, compacter un peu */
 @media (max-width: 1200px) {
@@ -400,7 +471,7 @@ body {
 #calendar-content .semaine thead th {
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: calc(var(--z-content) + 20);
     height: 56px;
     background: var(--head-bg);
     border-bottom: 1px solid var(--grid-strong);
@@ -413,7 +484,7 @@ body {
 #calendar-content .semaine thead th.corner {
     position: sticky;
     left: 0;
-    z-index: 3;
+    z-index: calc(var(--z-content) + 15);
     width: var(--hour-col-w);
     min-width: var(--hour-col-w);
     max-width: var(--hour-col-w);
@@ -422,7 +493,10 @@ body {
 }
 
 /* En-têtes des jours */
-#calendar-content .semaine thead th.day-header { text-align: center; }
+#calendar-content .semaine thead th.day-header {
+    text-align: center;
+    background: #fafafa;
+}
 #calendar-content .semaine thead th.day-header .day-header-inner {
     display: inline-flex; gap: 8px; align-items: center;
 }
@@ -442,10 +516,16 @@ body {
 
 /* ——— COLONNE HEURES (sticky) ——— */
 #calendar-content .semaine td.hour-col {
-    position: sticky; left: 0; z-index: 1;
-    width: var(--hour-col-w); min-width: var(--hour-col-w); max-width: var(--hour-col-w);
-    text-align: right; padding: 0 10px 0 6px;
-    color: #64748b; background: #fbfbfc;
+    position: sticky;
+    left: 0;
+    z-index: calc(var(--z-content) + 10);
+    width: var(--hour-col-w);
+    min-width: var(--hour-col-w);
+    max-width: var(--hour-col-w);
+    text-align: right;
+    padding: 0 10px 0 6px;
+    color: #64748b;
+    background: #fbfbfc;
     border-right: 1px solid var(--grid-strong);
     font-variant-numeric: tabular-nums;
 }
@@ -465,13 +545,6 @@ body {
 /* Alternance légère */
 #calendar-content .semaine tbody tr:nth-child(even) td.slot { background-color: #fcfdff; }
 
-/* ——— CELLULES JOUR ——— */
-#calendar-content .semaine td.slot { position: relative; transition: background-color .12s ease, box-shadow .12s ease; }
-#calendar-content .semaine td.slot:hover { background: rgba(2,132,199,.04); }
-
-#calendar-content .semaine td.slot.current-hour {
-    background-image: linear-gradient(to right, rgba(2,132,199,.06), transparent);
-}
 
 /* ——— LIGNE DE L’HEURE COURANTE (si ton JS l’injecte) ——— */
 #calendar-content .semaine .slot { position: relative; }
@@ -480,7 +553,7 @@ body {
     background: var(--color-link);
     box-shadow: 0 0 0 2px rgba(255,189,89,.15);
     pointer-events: none;
-    z-index: 3;
+    z-index: calc(var(--z-content) + 30);
 }
 
 /* =========================
@@ -493,7 +566,7 @@ body {
     left: 0; right: 0; top: 0;
     height: calc(var(--row-h) * 24);
     pointer-events: none;
-    z-index: 2;
+    z-index: calc(var(--z-content) + 5);
 }
 
 /* Chaque event est dans un <li> positionné par l’enfant .ceremony */
@@ -502,6 +575,7 @@ body {
     /* variables pilotées par le JS */
     top:    calc( (var(--start-min)  / 60) * var(--row-h) );
     height: calc( (var(--height-min) / 60) * var(--row-h) );
+    z-index: calc(var(--z-content) + 10 + (2 + var(--col-index)));
 
     /* mise en colonnes */
     --pad: 6px;         /* marge intérieure colonne */
@@ -547,33 +621,15 @@ body {
     margin: 4px 0 0; font-size: 11px; color: #804b00; white-space: normal;
 }
 
-/* Statuts (couleurs) — fonctionne avec li[data-status] ET .status-xxx */
-#calendar-content .semaine .day-layer > li[data-status="confirmed"] .ceremony,
-#calendar-content .semaine .ceremony.status-confirmed,
-#calendar-content .semaine .ceremony.status-confirmee {
-    background:#eaf6ee; border-color:#cfe9d6; color:#185a37;
-}
-#calendar-content .semaine .day-layer > li[data-status="pending"] .ceremony,
-#calendar-content .semaine .ceremony.status-pending,
-#calendar-content .semaine .ceremony.status-a_traiter {
-    background:#fff8e6; border-color:#f2e3b9; color:#7a5b00;
-}
-#calendar-content .semaine .day-layer > li[data-status="canceled"] .ceremony,
-#calendar-content .semaine .ceremony.status-canceled,
-#calendar-content .semaine .ceremony.status-annulee {
-    background:#fde8ea; border-color:#f4c9cf; color:#8a2530;
-}
-#calendar-content .semaine .day-layer > li[data-status="passed"] .ceremony,
-#calendar-content .semaine .ceremony.status-passed,
-#calendar-content .semaine .ceremony.status-passee {
-    background:#f3f4f6; border-color:#e5e7eb; color:#374151; opacity:.95;
-}
-
 /* Score (liseré gauche) */
-#calendar-content .semaine .ceremony[class*="score-"] { padding-left: 12px; }
-#calendar-content .semaine .ceremony.score-3 { border-left: 4px solid #60a5fa; }
-#calendar-content .semaine .ceremony.score-4 { border-left: 5px solid #3b82f6; }
-#calendar-content .semaine .ceremony.score-5 { border-left: 6px solid #2563eb; }
+#calendar-content .ceremony[class*="score-"] { padding-left: 12px; }
+#calendar-content .ceremony.score-3 { border-left: 4px solid #60a5fa; }
+#calendar-content .ceremony.score-4 { border-left: 5px solid #3b82f6; }
+#calendar-content .ceremony.score-5 { border-left: 6px solid #2563eb; }
+#calendar-content .ceremony.score-6 { border-left: 7px solid #6e25eb; }
+#calendar-content .ceremony.score-7 { border-left: 8px solid #ba25eb; }
+#calendar-content .ceremony.score-8 { border-left: 9px solid #eb25c3; }
+#calendar-content .ceremony.score-9 { border-left: 10px solid #eb2525; }
 
 /* Responsive léger */
 @media (max-width: 1200px) {
@@ -581,83 +637,106 @@ body {
     #calendar-content .semaine thead th { height: 50px; }
 }
 
-/* =========================
-   SEMAINE — Popup (modal)
-   ========================= */
-#calendar-content .semaine .ceremony-modal-overlay {
-    position: fixed;
-    inset: 0;
-    display: none;
-    place-items: center;
-    background: rgba(15, 23, 42, .35); /* overlay sombre doux */
+.ceremony-modal-overlay{
+    position: fixed; inset: 0;
+    display: none; place-items: center;
+    background: rgba(0,0,0,.45);
     z-index: 9000;
 }
-#calendar-content .semaine .ceremony-modal-overlay.is-open { display: grid; }
+.ceremony-modal-overlay.is-open{ display: grid; }
 
-#calendar-content .semaine .ceremony-modal {
-    position: absolute;
-    top: 115px;
-    height: 550px;
+.ceremony-modal{
+    transform: translate(125px, 45px);
+    width: calc(100% - 300px);
+    height: calc(100% - 130px);
     overflow: auto;
+
     background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.25);
-    padding: 16px 18px 18px;
-    transform: translateY(6px) scale(.98);
-    opacity: 0;
-    transition: transform .18s ease, opacity .18s ease;
-}
-#calendar-content .semaine .ceremony-modal-overlay.is-open .ceremony-modal {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-}
-
-#calendar-content .semaine .ceremony-modal .modal-close {
-    all: unset;
-    position: sticky; top: 0; float: right;
-    width: 32px; height: 32px; line-height: 32px; text-align: center;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 22px;
-    color: #334155;
-}
-#calendar-content .semaine .ceremony-modal .modal-close:hover {
-    background: #f1f5f9;
-}
-
-#calendar-content .semaine .ceremony-modal .modal-title {
-    margin: 6px 8px 10px 4px;
-    font-size: 20px;
-    font-weight: 800;
     color: #0f172a;
-}
-
-#calendar-content .semaine .ceremony-modal .modal-section {
-    border: 1px solid #e7ebf0;
+    border: 1px solid #dce1e6;
     border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.12);
+    padding: 16px 18px 18px;
+    z-index: 9010;
+}
+
+/* Titre clair, ligne fine d’accent */
+.ceremony-modal .modal-title{
+    margin: 0 40px 12px 0;
+    font-size: 20px; font-weight: 800;
+    border-bottom: 2px solid rgba(255,189,89,.35); /* --color-link adouci */
+    padding-bottom: 8px;
+}
+
+/* Bouton fermer simple */
+.ceremony-modal .modal-close{
+    position: absolute; top: 10px; right: 10px;
+    width: 32px; height: 32px; line-height: 32px; text-align: center;
+    border-radius: 8px; font-size: 20px; color: #334155;
+}
+.ceremony-modal .modal-close:hover{ background: #f1f5f9; }
+
+/* Sections = cartes basiques */
+.ceremony-modal .modal-section{
+    background: #fff;
+    border: 1px solid #e6ebf1;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 12px 0;
+}
+.ceremony-modal .modal-section.meta{
+    background: #fafafa;
+}
+
+/* Lignes clé/valeur nettes */
+.ceremony-modal .row{
+    display: grid; grid-template-columns: 150px 1fr;
+    gap: 12px; padding: 10px 0;
+    border-top: 1px dashed #e6ebf1;
+}
+.ceremony-modal .row:first-child{ border-top: 0; padding-top: 0; }
+
+.ceremony-modal .k{
+    color: #6b7280; font-weight: 600;
+}
+.ceremony-modal .v{
+    color: #111827; font-weight: 500; line-height: 1.45;
+}
+
+/* Demande spéciale (contraste élevé) */
+.ceremony-modal .special-text{
+    margin: 0;
     padding: 10px 12px;
-    margin: 10px 0;
-    background: #fbfdff;
-}
-#calendar-content .semaine .ceremony-modal .modal-section.meta { background: #fff; }
-
-#calendar-content .semaine .ceremony-modal .section-title {
-    font-weight: 700;
-    margin: 0 0 8px 0;
-    color: #0f172a;
+    background: #fff8e6;
+    border: 1px solid #f2e3b9;
+    color: #5c4700;
+    border-radius: 6px;
+    font-size: 14px;
 }
 
-#calendar-content .semaine .ceremony-modal .row {
-    display: grid;
-    grid-template-columns: 120px 1fr;
-    gap: 10px;
-    padding: 6px 0;
-    border-top: 1px dashed #e5e7eb;
+/* Accessibilité : focus visibles */
+.ceremony-modal button:focus,
+.ceremony-modal a:focus{
+    outline: 2px solid rgba(255,189,89,.6);
+    outline-offset: 2px;
 }
-#calendar-content .semaine .ceremony-modal .row:first-child { border-top: 0; }
 
-#calendar-content .semaine .ceremony-modal .k { color: #64748b; }
-#calendar-content .semaine .ceremony-modal .v { color: #111827; }
+/* Scroll interne discret */
+.ceremony-modal{ scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+.ceremony-modal::-webkit-scrollbar{ width: 10px; }
+.ceremony-modal::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:8px; }
+.ceremony-modal::-webkit-scrollbar-track{ background:transparent; }
+
+/* Mobile: une colonne */
+@media (max-width: 760px){
+    .ceremony-modal{ top: 80px; width: min(640px, calc(100vw - 16px)); padding: 14px; }
+    .ceremony-modal .row{ grid-template-columns: 1fr; gap: 6px; padding: 8px 0; }
+    .ceremony-modal .modal-title{ font-size: 18px; }
+}
+
+/* Option : garde l’accent du thème si dispo */
+:root{ --brand: var(--color-link, #FFBD59); }
+.ceremony-modal .modal-title{ border-bottom-color: color-mix(in srgb, var(--brand) 60%, transparent); }
 
 /* Statut en chip (reuse des couleurs existantes) */
 #calendar-content .semaine .status-chip {
@@ -685,6 +764,13 @@ body {
     background:#f3f4f6; border-color:#e5e7eb; color:#374151;
 }
 
+[data-date].is-selected,
+#calendar-content .mois tbody td.is-selected,
+#calendar-content .semaine td.slot.is-selected {
+    outline: 2px solid var(--color-link);
+    outline-offset: -2px;
+    background: rgba(255,189,89,.08);
+}
 
 #calendar-content .mois {
     height: 100%;
@@ -710,7 +796,7 @@ body {
 #calendar-content .mois thead th {
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: calc(var(--z-content) + 20);
     height: 44px;
     background: #fafafa;
     border-bottom: 1px solid var(--grid-strong);
@@ -828,47 +914,272 @@ body {
     }
 }
 
-.hour-passed,
-.day-passed,
-.hour-closed {
-    opacity: 1;
-    pointer-events: none;
-    background-color: #fafafa;
-    background-image: linear-gradient(135deg, #f3f3f3 25%, transparent 25%),
-    linear-gradient(225deg, #f3f3f3 25%, transparent 15%),
-    linear-gradient(45deg, #f3f3f3 25%, transparent 15%),
-    linear-gradient(315deg, #f3f3f3 25%, #fafafa 25%);
-    background-size: 10px 10px;
-    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+/* ===== Cartouches d’événements rendus avec <div class="ceremonie"> ===== */
+.ceremonie {
+    font-size: 12px;
+    line-height: 1.25;
+    padding: 6px 8px;
+    border: 1px solid #e7ebf0;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ceremonie .time {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    opacity: .85;
+}
+.ceremonie .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ceremonie .daynum {
+    margin-left: auto;
+    font-size: 11px;
+    color: #64748b;
+    background: #f1f5f9;
+    border-radius: 999px;
+    padding: 2px 6px;
 }
 
-.hour-closed:not(.day-passed),
-.day-closed {
-    position: relative;
-    opacity: 0.55;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-        45deg,
-        #f2f2f2,
-        #f2f2f2 8px,
-        #e6e6e6 8px,
-        #e6e6e6 16px
-    );
+/* (facultatif) harmoniser .ceremonie avec la grille "mois" existante */
+#calendar-content .mois tbody td > ul > li .ceremonie {
+    border: 0; padding: 0; box-shadow: none; background: transparent;
 }
 
-.current-day.hour-closed,
-.day-closed.day-passed {
-    opacity: 1;
-    pointer-events: none;
-    background-color: #fafafa;
-    background-image: linear-gradient(135deg, #f3f3f3 25%, transparent 25%),
-    linear-gradient(225deg, #f3f3f3 25%, transparent 15%),
-    linear-gradient(45deg, #f3f3f3 25%, transparent 15%),
-    linear-gradient(315deg, #f3f3f3 25%, #fafafa 25%) !important;
-    background-size: 10px 10px;
-    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+/* Mobile/≤1510px : fermé par défaut */
+.tags-group {
+    display: flex;
+    gap: 8px;
 }
 
-.week-table.thead th, .day-header.day-passed, .day-header.day-closed, .day-header {
-    opacity: 1 !important;
+#AllowTags { display: none; }
+/* ≥1511px : toujours visible, peu importe la classe */
+@media (max-width: 1517px) {
+    .tags-group {
+        display: none;
+        position: absolute;
+        background: white;
+        align-items: center;
+        z-index: calc(var(--z-header) + 20);
+        height: 50px;
+        padding: 8px;
+        border: 2px #E5E5E5 solid;
+        top: 53px;
+        right: 0;
+    }
+
+    /* Ouvert en mode compact (via le bouton) */
+    .tags-group.is-open {
+        display: flex;
+    }
+    #AllowTags { display: block }
+}
+
+@media (max-width: 1214px) {
+    .separator {
+        margin: 4px;
+    }
+}
+
+@media (max-width: 1195px) {
+    .separator {
+        display: none;
+        position: absolute;
+        left: 9999;
+        visibility: hidden;
+    }
+}
+
+@media (max-width: 1150px) {
+    .calendar-nav {
+        top: calc(88px + 48px + 5px);
+        left: 8px;
+    }
+
+    .calendar-header {
+        left: 8px;
+        top: calc(88px + 48px + 50px + 10px);
+    }
+
+    #calendar-content {
+        left: 8px;
+        top: calc(88px + 48px + 100px + 10px);
+    }
+
+    .ceremony-modal {
+        transform: unset;
+        height: unset;
+    }
+}
+
+
+/* ========= Thème & variables ========= */
+:root{
+    --bg: #ffffff;
+    --bg-elev: #ffffff;
+    --text: #0f172a;
+    --muted: #475569;
+    --border: #e5e7eb;
+    --ring: #0ea5e9;             /* sky-500 */
+    --ring-soft: rgba(14,165,233,.25);
+    --primary: #0ea5e9;
+    --primary-contrast: #ffffff;
+    --danger: #ef4444;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --shadow-lg: 0 20px 60px rgba(0,0,0,.18);
+}
+
+/* ========= Dialog ========= */
+.calendar-dialog{
+    position: absolute; /* garde ton positionnement existant */
+    transform: translate(125px, 45px);
+    width: min(960px, calc(100% - 300px));
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 80px);
+    background: var(--bg-elev);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 18px;
+    overflow: auto;
+    transition: transform .18s ease, opacity .18s ease;
+}
+
+.calendar-dialog::backdrop{
+    background: rgba(15, 23, 42, .40);
+    backdrop-filter: blur(2px);
+}
+
+/* ========= Titre ========= */
+.calendar-dialog h3{
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+/* ========= Formulaire ========= */
+#form-new{
+    display: grid;
+    gap: 12px;
+}
+
+/* Chaque label contient son champ */
+.calendar-dialog form label{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* Grille 2 colonnes pour certains groupes */
+.grid-2{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 720px){ .grid-2{ grid-template-columns: 1fr; } }
+
+/* Champs */
+.calendar-dialog input[type="text"],
+.calendar-dialog input[type="tel"],
+.calendar-dialog input[type="datetime-local"],
+.calendar-dialog select,
+.calendar-dialog textarea{
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    appearance: none;
+}
+
+.calendar-dialog textarea{
+    min-height: 110px;
+    resize: vertical;
+}
+
+.calendar-dialog input:focus,
+.calendar-dialog select:focus,
+.calendar-dialog textarea:focus{
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px var(--ring-soft);
+}
+
+/* États disabled/readonly */
+.calendar-dialog input:disabled,
+.calendar-dialog select:disabled,
+.calendar-dialog textarea:disabled{
+    opacity: .7;
+    cursor: not-allowed;
+}
+
+/* Invalid (HTML5 required) */
+.calendar-dialog input:required:invalid,
+.calendar-dialog select:required:invalid{
+    border-color: var(--danger);
+}
+
+/* ========= Actions ========= */
+.calendar-dialog form > div:last-of-type{
+    /* le conteneur de tes boutons (le <div> juste avant </form>) */
+    margin-top: 6px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.calendar-dialog button{
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    transition: transform .06s ease, box-shadow .15s ease, background .15s ease;
+}
+.calendar-dialog button:hover{ box-shadow: 0 4px 18px rgba(0,0,0,.06); }
+.calendar-dialog button:active{ transform: translateY(1px); }
+
+.calendar-dialog #btn-save{
+    border: none;
+    background: var(--primary);
+    color: var(--primary-contrast);
+}
+
+/* ========= Affinages mobiles & accessibilité ========= */
+@media (max-width: 480px){
+    .calendar-dialog{ padding: 14px; }
+    .calendar-dialog h3{ font-size: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .calendar-dialog, .calendar-dialog button{ transition: none; }
+}
+
+.day-passed, .hour-passed {
+    opacity: 1; pointer-events: none; background-color: #fafafa; background-image: linear-gradient(135deg, #f3f3f3 25%, transparent 25%), linear-gradient(225deg, #f3f3f3 25%, transparent 15%), linear-gradient(45deg, #f3f3f3 25%, transparent 15%), linear-gradient(315deg, #f3f3f3 25%, #fafafa 25%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+}
+
+.current-day.current-hour {
+    background: unset;
+}
+
+.day-closed, .hour-close {
+    position: relative; pointer-events: none; background: repeating-linear-gradient( 45deg, rgba(242, 242, 242, 0.5), rgba(242, 242, 242, 0.5) 8px, rgba(230, 230, 230, 0.5) 8px, rgba(230, 230, 230, 0.5) 16px);
 }

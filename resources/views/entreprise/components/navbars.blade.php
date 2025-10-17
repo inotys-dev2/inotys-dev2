@@ -16,12 +16,12 @@
             </button>
             <ul class="dropdown__menu">
                 <li>
-                    <a href="{{ route('entreprise.agenda.calendar', ['uuid' => $entreprise->uuid]) }}" class="dropdown__item">
+                    <a href="{{ route('entreprise.agenda.calendar.index', ['uuid' => $entreprise->uuid]) }}" class="dropdown__item">
                         Mon agenda
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('entreprise.agenda.demandes', ['uuid' => $entreprise->uuid]) }}" class="dropdown__item">
+                    <a href="{{ route('entreprise.agenda.demandes.index', ['uuid' => $entreprise->uuid]) }}" class="dropdown__item">
                         Les demandes
                     </a>
                 </li>

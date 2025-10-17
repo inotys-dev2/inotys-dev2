@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\DemandeCeremonie;
 use App\Models\Entreprises;
 use App\Models\Paroisses;
+use App\Models\UtilisateurEntreprise;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CalendarController extends Controller
@@ -20,9 +22,20 @@ class CalendarController extends Controller
 
     public function indexEntreprise(string $uuid)
     {
-        $entrprise = Entreprises::where('uuid', $uuid)->firstOrFail();
-        $Paroisses = Paroisses::all();
-        return view('entreprise.agenda.calendar', ['paroisses' => $Paroisses, 'entreprise' => $entrprise]);
+        $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
+        $Paroisses  = Paroisses::all();
+        $counts     = DemandeCeremonie::where('entreprise_id', $entreprise->id)->select('paroisse_id', DB::raw('COUNT(*) AS total'))->groupBy('paroisse_id')->pluck('total', 'paroisse_id');
+        $suivis = $entreprise->entreprise_user()
+            ->orderBy('nom')
+            ->get(['users.id','users.prenom', 'users.nom']);
+
+        return view('entreprise.agenda.calendar', [
+            'paroisses' => $Paroisses,
+            'entreprise'=> $entreprise,
+            'counts'    => $counts,
+            'suivis'    => $suivis,
+        ]);
+
     }
 
     public function events(Request $request)
@@ -31,7 +44,7 @@ class CalendarController extends Controller
             'from'          => 'required|date',
             'to'            => 'required|date|after:from',
             'paroisse_id'   => 'nullable|integer|exists:paroisse,id',
-            'entreprise_id' => 'nullable|integer|exists:entreprises,id',
+            'entreprise_id' => 'nullable|integer|exists:entreprise,id',
             'tags'          => 'nullable|array',
             'affichage'     => 'nullable|in:toutes,assignees,non_assignees',
         ]);
@@ -44,12 +57,10 @@ class CalendarController extends Controller
 
         $q = DemandeCeremonie::query()
             ->with('entreprise')
+            ->with('paroisse')
             ->whereBetween('ceremony_date', [$from->toDateString(), $to->toDateString()])
-            ->when(!empty($data['paroisse_id'] ?? null), fn($q) =>
-            $q->where('paroisse_id', $data['paroisse_id'])
-            )
-            ->when(!empty($data['entreprise_id'] ?? null), fn($q) =>
-            $q->where('entreprise_id', $data['entreprise_id'])
+            ->when(!empty($data['paroisse_id'] ?? null), fn($q) => $q->where('paroisse_id', $data['paroisse_id']))
+            ->when(!empty($data['entreprise_id'] ?? null), fn($q) => $q->where('entreprise_id', $data['entreprise_id'])
             )
             ->when(($data['affichage'] ?? 'toutes') === 'assignees', fn($q) =>
             $q->where('assigned_at', $request->user()->id)
@@ -70,7 +81,7 @@ class CalendarController extends Controller
 
             return [
                 'id'     => $c->id,
-                'title'  => $c->deceased_name ?? 'Cérémonie',
+                'title'  => $c->deceased_name ?? 'Aucun défunt',
                 'status' => $c->statut,
                 'start'  => $start->toIso8601String(),
                 'end'    => $end->toIso8601String(),
@@ -80,6 +91,7 @@ class CalendarController extends Controller
                 'contact_family_name' => $c->contact_family_name,
                 'contact_family_phone' => $c->telephone_contact_family,
                 'pompe_funebre' => $c->entreprise,
+                'paroisse' => $c->paroisse,
             ];
         });
 
@@ -97,35 +109,58 @@ class CalendarController extends Controller
 
     public function update(Request $request, string $uuid, DemandeCeremonie $ceremony)
     {
-        $data = $request->validate([
-            'title'    => 'sometimes|required|string|max:255',
-            'start_at' => 'sometimes|required|date',
-            'end_at'   => 'sometimes|required|date|after:start_at',
-            'status'   => 'sometimes|required|in:treatment,waiting,accepted,canceled,passed',
+
+        return response()->json(['message' => 'Mis à jour']);
+    }
+
+    public function store(StoreDemandeCeremonieRequest $request)
+    {
+        $data = $request->validated();
+
+        $paroisse = Paroisse::findOrFail($data['paroisse_id']);
+        $this->authorize('create', [\App\Models\DemandeCeremonie::class, $paroisse]);
+
+        // Récupère la disponibilité rattachée à la paroisse
+        $availability = $paroisse->availability ?? ['days'=>[], 'start_time'=>null, 'end_time'=>null];
+
+        // Règles métier supplémentaires
+        $request->validate([
+            'start'       => [new WithinAvailability($availability)],
+            'end'         => [new WithinAvailability($availability)],
+            'paroisse_id' => [new NoOverlap($data['paroisse_id'])],
         ]);
 
-        // Vérrouillage tenant : on empêche la MAJ si l’élément n’appartient pas au tenant de l’URL
-        $this->extracted($request, $uuid, $ceremony);
+        return DB::transaction(function () use ($data) {
+            // lock défensif contre la course
+            $overlap = DemandeCeremonie::where('paroisse_id', $data['paroisse_id'])
+                ->lockForUpdate()
+                ->where(function($qq) use ($data) {
+                    $qq->whereBetween('start', [$data['start'], $data['end']])
+                        ->orWhereBetween('end',   [$data['start'], $data['end']])
+                        ->orWhere(function($q2) use ($data){
+                            $q2->where('start','<=',$data['start'])->where('end','>=',$data['end']);
+                        });
+                })
+                ->exists();
 
-        if (isset($data['start_at'], $data['end_at'])) {
-            $start = Carbon::parse($data['start_at']);
-            $end   = Carbon::parse($data['end_at']);
-            $ceremony->ceremony_date = $start->toDateString();
-            $ceremony->ceremony_hour = $start->format('H:i:s');
-            $ceremony->duration_time = $start->diffInMinutes($end);
-            unset($data['start_at'], $data['end_at']);
-        }
-        if (isset($data['title'])) {
-            $ceremony->deceased_name = $data['title'];
-            unset($data['title']);
-        }
-        if (isset($data['status'])) {
-            $ceremony->statut = $data['status'];
-            unset($data['status']);
-        }
+            if ($overlap) {
+                abort(422, 'Le créneau vient d’être pris. Merci de choisir une autre heure.');
+            }
 
-        $ceremony->fill($data)->save();
-        return response()->json(['message' => 'Mis à jour']);
+            $ceremony = DemandeCeremonie::create([
+                'title'  => $data['title'],
+                'paroisse_id' => $data['paroisse_id'],
+                'start'  => $data['start'],
+                'end'    => $data['end'],
+                'special_request' => $data['special_request'] ?? null,
+                'contact_family_name'  => $data['contact_family_name'] ?? null,
+                'contact_family_phone' => $data['contact_family_phone'] ?? null,
+                'status' => $data['status'] ?? 'confirmed',
+                'created_by' => auth()->id(),
+            ]);
+
+            return response()->json(['success' => true, 'id' => $ceremony->id], 201);
+        });
     }
 
     private function getAvailabilityForParoisse(int $paroisseId): ?array

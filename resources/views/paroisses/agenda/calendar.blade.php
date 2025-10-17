@@ -645,8 +645,6 @@
                 });
             }
 
-
-
             // ========= Chargement principal =========
             async function load() {
                 const { from, to } = rangeForView();
@@ -678,10 +676,7 @@
                     content.textContent = err.message || 'Erreur de chargement';
                 }
             }
-
-            // ========= Go =========
             load();
         })();
     </script>
-
 @endsection

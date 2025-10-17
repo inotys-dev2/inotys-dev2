@@ -88,26 +88,47 @@ Route::middleware(['auth', 'access:admin'])->group(function () {
 /**
  * Route exclusivement pour les utilisateurs d'entreprises obligatoirement connectées
  */
-Route::middleware(['auth', 'access:entreprise'])->group(function () {
-     Route::get('entreprise/{uuid}/dashboard',               [EntrepriseController::class, 'dashboard'])->name('entreprise.dashboard');
-     Route::get('entreprise/{uuid}/demandes',                [EntrepriseAgendaController::class, 'showAllDemande'])->name('entreprise.agenda.demandes');
-     Route::get('entreprise/{uuid}/demandes/{id}',           [EntrepriseAgendaController::class, 'detailDemande'])->name('entreprise.agenda.demandes.detail');
-     Route::get('entreprise/{uuid}/paiement/creation_devis', [EntreprisePaiementController::class, 'creationDevis'])->name('entreprise.paiement.creation_devis');
-     Route::get('entreprise/{uuid}/paiement/attentes',       [EntreprisePaiementController::class, 'attentes'])->name('entreprise.paiement.attentes');
-     Route::get('entreprise/{uuid}/paiement/effectues',      [EntreprisePaiementController::class, 'effectues'])->name('entreprise.paiement.effectues');
-     Route::get('entreprise/{uuid}/paiement/historique',     [EntreprisePaiementController::class, 'historique'])->name('entreprise.paiement.historique');
-     Route::get('entreprise/{uuid}/admin/profile',           [EntrepriseAdminController::class, 'profile'])->name('entreprise.admin.profile');
-     Route::get('entreprise/{uuid}/admin/parametre',         [EntrepriseAdminController::class, 'parameters'])->name('entreprise.admin.parametre');
-     Route::get('entreprise/{uuid}/admin/membres',           [EntrepriseAdminController::class, 'membres'])->name('entreprise.admin.membres');
-     Route::get('entreprise/{uuid}/admin/logs',              [EntrepriseAdminController::class, 'logs'])->name('entreprise.admin.logs');
+Route::middleware(['auth', 'verified', 'access:entreprise'])
+    ->prefix('entreprise/{uuid}')
+    ->whereUuid('uuid')
+    ->as('entreprise.')
+    ->group(function () {
 
-    Route::prefix('entreprise/{uuid}/calendar')->group(function () {
-        Route::get('/', [CalendarController::class, 'indexEntreprise'])->name('entreprise.agenda.calendar');
-        Route::get('/events',   [CalendarController::class, 'events'])->name('entreprise.agenda.calendar.events');
-        Route::post('/events',  [CalendarController::class, 'store'])->name('entreprise.agenda.calendar.store');
-        Route::patch('/events/{ceremony}',  [CalendarController::class, 'update'])->whereNumber('ceremony')->name('entreprise.agenda.calendar.update');
+        // Dash + pages
+        Route::get('/dashboard', [EntrepriseController::class, 'dashboard'])->name('dashboard');
+
+        // Demandes
+        Route::prefix('demandes')->as('agenda.demandes.')->group(function () {
+            Route::get('/', [EntrepriseAgendaController::class, 'showAllDemande'])->name('index');
+            Route::get('/{id}', [EntrepriseAgendaController::class, 'detailDemande'])
+                ->whereNumber('id')->name('detail');
+        });
+
+        // Paiements
+        Route::prefix('paiement')->as('paiement.')->group(function () {
+            Route::get('/creation_devis', [EntreprisePaiementController::class, 'creationDevis'])->name('creation_devis');
+            Route::get('/attentes', [EntreprisePaiementController::class, 'attentes'])->name('attentes');
+            Route::get('/effectues', [EntreprisePaiementController::class, 'effectues'])->name('effectues');
+            Route::get('/historique', [EntreprisePaiementController::class, 'historique'])->name('historique');
+        });
+
+        // Admin
+        Route::prefix('admin')->as('admin.')->group(function () {
+            Route::get('/profile',   [EntrepriseAdminController::class, 'profile'])->name('profile');
+            Route::get('/parametre', [EntrepriseAdminController::class, 'parameters'])->name('parametre');
+            Route::get('/membres',   [EntrepriseAdminController::class, 'membres'])->name('membres');
+            Route::get('/logs',      [EntrepriseAdminController::class, 'logs'])->name('logs');
+        });
+
+        // Calendar
+        Route::prefix('calendar')->as('agenda.calendar.')->group(function () {
+            Route::get('/',        [CalendarController::class, 'indexEntreprise'])->name('index');
+            Route::get('/events',  [CalendarController::class, 'events'])->name('events');
+            Route::post('/events', [CalendarController::class, 'store'])
+                ->middleware('throttle:ceremony') // limite la création
+                ->name('store');
+        });
     });
-});
 
 /**
  * Route exclusivement pour les utilisateurs de paroisse obligatoirement connectées

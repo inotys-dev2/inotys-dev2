@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class EntrepriseAgendaController extends Controller
 {
-    public function calendar($uuid)
+    public function calendar($uuid): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
         $paroisses = Paroisses::all();
@@ -59,39 +59,12 @@ class EntrepriseAgendaController extends Controller
         return view('entreprise.agenda.calendar', compact('entreprise', 'paroisses', 'events'));
     }
 
-    public function getWorkingDays(Request $request)
-    {
-        $validated = $request->validate([
-            'parishId' => ['required', 'integer', 'exists:paroisses,id'],
-        ]);
-
-        $parish = Paroisses::findOrFail($validated['parishId']);
-
-        $slots = $parish->availabilitySlots()->select('day_of_week', 'start_time', 'end_time')->get();
-
-        $businessHours = $slots->flatMap(function ($slot) {
-            $days = $slot->day_of_week !== null ? [(int) $slot->day_of_week] : range(0, 6);
-
-            return collect($days)->map(fn($d) => [
-                'startTime' => Carbon::parse($slot->start_time)->format('H:i'),
-                'endTime'   => Carbon::parse($slot->end_time)->format('H:i'),
-            ]);
-        })->values();
-
-        $businessDays = $parish->availabilitySlots()->select('day_of_week')->get();
-
-        return response()->json([
-            'businessHours' => $businessHours,
-            'businessDays'  => $businessDays,
-        ]);
-    }
-
     public function envoyer(Request $request, $uuid)
     {
-        $company = Entreprises::where('uuid', $uuid)->firstOrFail();
+        $entreprise = Entreprises::where('uuid', $uuid)->firstOrFail();
 
         $data = $request->validate([
-            'paroisse_id'              => 'required|exists:paroisses,id',
+            'paroisse_id'              => 'required|exists:paroisse,id',
             'deceased_name'            => 'required|string',
             'ceremony_date'            => 'required|date',
             'ceremony_hour'            => 'required',
@@ -106,7 +79,7 @@ class EntrepriseAgendaController extends Controller
             $ceremony->update($data);
             $message = 'The request has been updated successfully.';
         } else {
-            $data['entreprise_id']      = $company->id;
+            $data['entreprise_id']      = $entreprise->id;
             $data['user_entreprise_id'] = auth()->id();
             $data['statut']             = 'waiting';
             $data['statut_paiement']    = 'define';

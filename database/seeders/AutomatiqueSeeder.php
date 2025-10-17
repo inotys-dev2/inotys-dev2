@@ -11,6 +11,7 @@ use Database\Factories\EntreprisesFactory;
 use Database\Factories\ParoissesFactory;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class AutomatiqueSeeder extends Seeder
@@ -99,14 +100,16 @@ class AutomatiqueSeeder extends Seeder
 
         // ---------------------------------------------------
         //ajoute d'une demande entre l'entreprise memorys et la paroisse Diocese
-        $nombreDemandes = rand(50, 50);
+        $nombreDemandes = 10;
+        $select = [30, 45, 60, 120];
 
         DemandeCeremonie::factory()
             ->count($nombreDemandes)
+            ->state(fn () => ['duration_time' => Arr::random($select)]) // appelé pour CHAQUE enregistrement
             ->create([
-                'entreprise_id'        => $Memorys->id,                 // FK -> entreprise
-                'user_entreprise_id'   => $DirecteurMemorys->id,        // FK -> users (OBLIGATOIRE)
-                'paroisse_id'          => $Diocese->id,                 // FK -> paroisse
+                'entreprise_id'        => $Memorys->id,
+                'user_entreprise_id'   => $DirecteurMemorys->id,
+                'paroisse_id'          => $Diocese->id,
                 'users_paroisses_id'   => $userparoises->id,
             ]);
     }

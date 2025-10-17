@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
@@ -32,25 +33,14 @@ class Entreprises extends Model
     /**
      * Toutes les liaisons de pivot Entreprise_User
      */
-
-    public function entreprise_user(): HasOne
-    {
-        return $this->hasOne(UtilisateurEntreprise::class, 'users_id');
-    }
-
-    /**
-     * (optionnel) Accès direct aux users via le pivot
-     */
-    public function users()
+    public function entreprise_user(): BelongsToMany
     {
         return $this->belongsToMany(
             User::class,
             'users_entreprises',
             'entreprise_id',
             'users_id'
-        )->withPivot('rank')
-            ->using(UtilisateurEntreprise::class)
-            ->withTimestamps();
+        );
     }
 
     // Exemple de relation avec les demandes de cérémonie
